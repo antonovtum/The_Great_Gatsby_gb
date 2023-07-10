@@ -1,0 +1,161 @@
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 1.
+Hexadecimal [24-Bits]
+
+Symbol Table
+
+    .__.$$$.                                                    =  002710 L
+    .__.ABS.                                                    =  000000 G
+    .__.CPU.                                                    =  000000 L
+    .__.H$L.                                                    =  000000 L
+    ___bank_gatsby_678                                             ****** GX
+    ___bank_gatsby_679                                          =  0000FF G
+    ___bank_gatsby_680                                          =  0000FF G
+    ___bank_gatsby_681                                          =  0000FF G
+    ___bank_gatsby_682                                          =  0000FF G
+    ___bank_gatsby_683                                          =  0000FF G
+    ___bank_gatsby_684                                          =  0000FF G
+    ___bank_gatsby_685                                          =  0000FF G
+    ___bank_gatsby_686                                          =  0000FF G
+    ___bank_gatsby_687                                          =  0000FF G
+    ___bank_gatsby_688                                          =  0000FF G
+    ___bank_gatsby_689                                          =  0000FF G
+    ___bank_gatsby_690                                          =  0000FF G
+    ___bank_gatsby_691                                          =  0000FF G
+    ___bank_gatsby_692                                          =  0000FF G
+    ___bank_gatsby_693                                          =  0000FF G
+    ___bank_gatsby_694                                          =  0000FF G
+    ___bank_gatsby_695                                          =  0000FF G
+    ___bank_gatsby_696                                          =  0000FF G
+    ___bank_gatsby_697                                          =  0000FF G
+    ___bank_gatsby_698                                          =  0000FF G
+    ___bank_gatsby_699                                          =  0000FF G
+    ___bank_gatsby_700                                          =  0000FF G
+    ___bank_gatsby_701                                          =  0000FF G
+    ___bank_gatsby_702                                          =  0000FF G
+    ___bank_gatsby_703                                          =  0000FF G
+    ___bank_gatsby_704                                          =  0000FF G
+    ___bank_gatsby_705                                          =  0000FF G
+    ___bank_gatsby_706                                          =  0000FF G
+    ___bank_gatsby_707                                          =  0000FF G
+    ___bank_gatsby_708                                          =  0000FF G
+    ___bank_gatsby_709                                             ****** GX
+  7 ___func_gatsby_679                                             000000 GR
+  7 ___func_gatsby_680                                             000000 GR
+  7 ___func_gatsby_681                                             000000 GR
+  7 ___func_gatsby_682                                             000000 GR
+  7 ___func_gatsby_683                                             000000 GR
+  7 ___func_gatsby_684                                             000000 GR
+  7 ___func_gatsby_685                                             000000 GR
+  7 ___func_gatsby_686                                             000000 GR
+  7 ___func_gatsby_687                                             000000 GR
+  7 ___func_gatsby_688                                             000000 GR
+  7 ___func_gatsby_689                                             000000 GR
+  7 ___func_gatsby_690                                             000000 GR
+  7 ___func_gatsby_691                                             000000 GR
+  7 ___func_gatsby_692                                             000000 GR
+  7 ___func_gatsby_693                                             000000 GR
+  7 ___func_gatsby_694                                             000000 GR
+  7 ___func_gatsby_695                                             000000 GR
+  7 ___func_gatsby_696                                             000000 GR
+  7 ___func_gatsby_697                                             000000 GR
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 2.
+Hexadecimal [24-Bits]
+
+Symbol Table
+
+  7 ___func_gatsby_698                                             000000 GR
+  7 ___func_gatsby_699                                             000000 GR
+  7 ___func_gatsby_700                                             000000 GR
+  7 ___func_gatsby_701                                             000000 GR
+  7 ___func_gatsby_702                                             000000 GR
+  7 ___func_gatsby_703                                             000000 GR
+  7 ___func_gatsby_704                                             000000 GR
+  7 ___func_gatsby_705                                             000000 GR
+  7 ___func_gatsby_706                                             000000 GR
+  7 ___func_gatsby_707                                             000000 GR
+  7 ___func_gatsby_708                                             000000 GR
+    _page_678                                                      ****** GX
+  7 _page_679                                                      000000 GR
+  7 _page_680                                                      000170 GR
+  7 _page_681                                                      0002E0 GR
+  7 _page_682                                                      000450 GR
+  7 _page_683                                                      0005C0 GR
+  7 _page_684                                                      000730 GR
+  7 _page_685                                                      0008A0 GR
+  7 _page_686                                                      000A10 GR
+  7 _page_687                                                      000B80 GR
+  7 _page_688                                                      000CF0 GR
+  7 _page_689                                                      000E60 GR
+  7 _page_690                                                      000FD0 GR
+  7 _page_691                                                      001140 GR
+  7 _page_692                                                      0012B0 GR
+  7 _page_693                                                      001420 GR
+  7 _page_694                                                      001590 GR
+  7 _page_695                                                      001700 GR
+  7 _page_696                                                      001870 GR
+  7 _page_697                                                      0019E0 GR
+  7 _page_698                                                      001B50 GR
+  7 _page_699                                                      001CC0 GR
+  7 _page_700                                                      001E30 GR
+  7 _page_701                                                      001FA0 GR
+  7 _page_702                                                      002110 GR
+  7 _page_703                                                      002280 GR
+  7 _page_704                                                      0023F0 GR
+  7 _page_705                                                      002560 GR
+  7 _page_706                                                      0026D0 GR
+  7 _page_707                                                      002840 GR
+  7 _page_708                                                      0029B0 GR
+    _page_709                                                      ****** GX
+    b___func_gatsby_679                                         =  0000FF L
+    b___func_gatsby_680                                         =  0000FF L
+    b___func_gatsby_681                                         =  0000FF L
+    b___func_gatsby_682                                         =  0000FF L
+    b___func_gatsby_683                                         =  0000FF L
+    b___func_gatsby_684                                         =  0000FF L
+    b___func_gatsby_685                                         =  0000FF L
+    b___func_gatsby_686                                         =  0000FF L
+    b___func_gatsby_687                                         =  0000FF L
+    b___func_gatsby_688                                         =  0000FF L
+    b___func_gatsby_689                                         =  0000FF L
+    b___func_gatsby_690                                         =  0000FF L
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 3.
+Hexadecimal [24-Bits]
+
+Symbol Table
+
+    b___func_gatsby_691                                         =  0000FF L
+    b___func_gatsby_692                                         =  0000FF L
+    b___func_gatsby_693                                         =  0000FF L
+    b___func_gatsby_694                                         =  0000FF L
+    b___func_gatsby_695                                         =  0000FF L
+    b___func_gatsby_696                                         =  0000FF L
+    b___func_gatsby_697                                         =  0000FF L
+    b___func_gatsby_698                                         =  0000FF L
+    b___func_gatsby_699                                         =  0000FF L
+    b___func_gatsby_700                                         =  0000FF L
+    b___func_gatsby_701                                         =  0000FF L
+    b___func_gatsby_702                                         =  0000FF L
+    b___func_gatsby_703                                         =  0000FF L
+    b___func_gatsby_704                                         =  0000FF L
+    b___func_gatsby_705                                         =  0000FF L
+    b___func_gatsby_706                                         =  0000FF L
+    b___func_gatsby_707                                         =  0000FF L
+    b___func_gatsby_708                                         =  0000FF L
+
+
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 4.
+Hexadecimal [24-Bits]
+
+Area Table
+
+   0 _CODE                                      size      0   flags    0
+   1 _DATA                                      size      0   flags    0
+   2 _INITIALIZED                               size      0   flags    0
+   3 _DABS                                      size      0   flags    8
+   4 _HOME                                      size      0   flags    0
+   5 _GSINIT                                    size      0   flags    0
+   6 _GSFINAL                                   size      0   flags    0
+   7 _CODE_255                                  size   2B20   flags    0
+   8 _INITIALIZER                               size      0   flags    0
+   9 _CABS                                      size      0   flags    8
+

@@ -1,0 +1,1804 @@
+                                      1 ;--------------------------------------------------------
+                                      2 ; File Created by SDCC : free open source ANSI-C Compiler
+                                      3 ; Version 4.1.6 #12539 (MINGW32)
+                                      4 ;--------------------------------------------------------
+                                      5 	.module main
+                                      6 	.optsdcc -mgbz80
+                                      7 	
+                                      8 ;--------------------------------------------------------
+                                      9 ; Public variables in this module
+                                     10 ;--------------------------------------------------------
+                                     11 	.globl _interrupt_LCD
+                                     12 	.globl _font_set
+                                     13 	.globl _font_load
+                                     14 	.globl _font_init
+                                     15 	.globl _itoa
+                                     16 	.globl _printf
+                                     17 	.globl _set_bkg_tile_xy
+                                     18 	.globl _set_bkg_tiles
+                                     19 	.globl _set_bkg_data
+                                     20 	.globl _wait_vbl_done
+                                     21 	.globl _set_interrupts
+                                     22 	.globl _joypad
+                                     23 	.globl _add_LCD
+                                     24 	.globl _forward
+                                     25 	.globl _i
+                                     26 	.globl _mapped_bookmark
+                                     27 	.globl _end_p_height
+                                     28 	.globl _frame
+                                     29 	.globl _joy
+                                     30 	.globl _b_button_down
+                                     31 	.globl _a_button_down
+                                     32 	.globl _l_button_down
+                                     33 	.globl _r_button_down
+                                     34 	.globl _h_b
+                                     35 	.globl _h_a
+                                     36 	.globl _h_left
+                                     37 	.globl _h_right
+                                     38 	.globl _current_page
+                                     39 	.globl _book_font
+                                     40 	.globl _map
+                                     41 	.globl _update_joy
+                                     42 	.globl _next_page
+                                     43 	.globl _prev_page
+                                     44 	.globl _resolve_jumping_point
+                                     45 	.globl _jump_page
+                                     46 	.globl _update_page_bookmark
+                                     47 	.globl _choose_page
+                                     48 	.globl _main
+                                     49 ;--------------------------------------------------------
+                                     50 ; special function registers
+                                     51 ;--------------------------------------------------------
+                                     52 ;--------------------------------------------------------
+                                     53 ; ram data
+                                     54 ;--------------------------------------------------------
+                                     55 	.area _DATA
+                           000000    56 G$book_font$0_0$0==.
+      000000                         57 _book_font::
+      000000                         58 	.ds 2
+                           000002    59 G$current_page$0_0$0==.
+      000002                         60 _current_page::
+      000002                         61 	.ds 368
+                           000172    62 Fmain$page_number$0_0$0==.
+      000172                         63 _page_number:
+      000172                         64 	.ds 2
+                           000174    65 Fmain$page_number_temp$0_0$0==.
+      000174                         66 _page_number_temp:
+      000174                         67 	.ds 2
+                           000176    68 Fmain$page_select$0_0$0==.
+      000176                         69 _page_select:
+      000176                         70 	.ds 1
+                           000177    71 Fmain$page_chars$0_0$0==.
+      000177                         72 _page_chars:
+      000177                         73 	.ds 4
+                           00017B    74 Fmain$p_turner_cd$0_0$0==.
+      00017B                         75 _p_turner_cd:
+      00017B                         76 	.ds 1
+                           00017C    77 Fmain$p_turner_i$0_0$0==.
+      00017C                         78 _p_turner_i:
+      00017C                         79 	.ds 1
+                           00017D    80 G$h_right$0_0$0==.
+      00017D                         81 _h_right::
+      00017D                         82 	.ds 1
+                           00017E    83 G$h_left$0_0$0==.
+      00017E                         84 _h_left::
+      00017E                         85 	.ds 1
+                           00017F    86 G$h_a$0_0$0==.
+      00017F                         87 _h_a::
+      00017F                         88 	.ds 1
+                           000180    89 G$h_b$0_0$0==.
+      000180                         90 _h_b::
+      000180                         91 	.ds 1
+                           000181    92 G$r_button_down$0_0$0==.
+      000181                         93 _r_button_down::
+      000181                         94 	.ds 1
+                           000182    95 G$l_button_down$0_0$0==.
+      000182                         96 _l_button_down::
+      000182                         97 	.ds 1
+                           000183    98 G$a_button_down$0_0$0==.
+      000183                         99 _a_button_down::
+      000183                        100 	.ds 1
+                           000184   101 G$b_button_down$0_0$0==.
+      000184                        102 _b_button_down::
+      000184                        103 	.ds 1
+                           000185   104 G$joy$0_0$0==.
+      000185                        105 _joy::
+      000185                        106 	.ds 1
+                           000186   107 G$frame$0_0$0==.
+      000186                        108 _frame::
+      000186                        109 	.ds 1
+                           000187   110 G$end_p_height$0_0$0==.
+      000187                        111 _end_p_height::
+      000187                        112 	.ds 1
+                           000188   113 G$mapped_bookmark$0_0$0==.
+      000188                        114 _mapped_bookmark::
+      000188                        115 	.ds 1
+                           000189   116 G$i$0_0$0==.
+      000189                        117 _i::
+      000189                        118 	.ds 2
+                           00018B   119 G$forward$0_0$0==.
+      00018B                        120 _forward::
+      00018B                        121 	.ds 1
+                                    122 ;--------------------------------------------------------
+                                    123 ; ram data
+                                    124 ;--------------------------------------------------------
+                                    125 	.area _INITIALIZED
+                                    126 ;--------------------------------------------------------
+                                    127 ; absolute external ram data
+                                    128 ;--------------------------------------------------------
+                                    129 	.area _DABS (ABS)
+                                    130 ;--------------------------------------------------------
+                                    131 ; global & static initialisations
+                                    132 ;--------------------------------------------------------
+                                    133 	.area _HOME
+                                    134 	.area _GSINIT
+                                    135 	.area _GSFINAL
+                                    136 	.area _GSINIT
+                                    137 ;--------------------------------------------------------
+                                    138 ; Home
+                                    139 ;--------------------------------------------------------
+                                    140 	.area _HOME
+                                    141 	.area _HOME
+                                    142 ;--------------------------------------------------------
+                                    143 ; code
+                                    144 ;--------------------------------------------------------
+                                    145 	.area _CODE
+                           000000   146 	G$map$0$0	= .
+                                    147 	.globl	G$map$0$0
+                           000000   148 	C$main.c$45$0_0$136	= .
+                                    149 	.globl	C$main.c$45$0_0$136
+                                    150 ;src/main.c:45: int16_t map(int16_t x) {
+                                    151 ;	---------------------------------
+                                    152 ; Function map
+                                    153 ; ---------------------------------
+      000000                        154 _map::
+      000000 E8 F8                  155 	add	sp, #-8
+                           000002   156 	C$main.c$46$1_0$136	= .
+                                    157 	.globl	C$main.c$46$1_0$136
+                                    158 ;src/main.c:46: return (int32_t)((int32_t)(((int32_t)(x) - 1) * -119) / 947) + 255;
+      000002 F8 0A                  159 	ldhl	sp,	#10
+      000004 7E                     160 	ld	a, (hl)
+      000005 F8 00                  161 	ldhl	sp,	#0
+      000007 77                     162 	ld	(hl), a
+      000008 F8 0B                  163 	ldhl	sp,	#11
+      00000A 7E                     164 	ld	a, (hl)
+      00000B F8 01                  165 	ldhl	sp,	#1
+      00000D 22                     166 	ld	(hl+), a
+      00000E 07                     167 	rlca
+      00000F 9F                     168 	sbc	a, a
+      000010 22                     169 	ld	(hl+), a
+      000011 22                     170 	ld	(hl+), a
+      000012 23                     171 	inc	hl
+      000013 D1                     172 	pop	de
+      000014 D5                     173 	push	de
+      000015 7B                     174 	ld	a, e
+      000016 D6 01                  175 	sub	a, #0x01
+      000018 5F                     176 	ld	e, a
+      000019 7A                     177 	ld	a, d
+      00001A DE 00                  178 	sbc	a, #0x00
+      00001C F5                     179 	push	af
+      00001D 32                     180 	ld	(hl-), a
+      00001E 7B                     181 	ld	a, e
+      00001F 32                     182 	ld	(hl-), a
+      000020 2B                     183 	dec	hl
+      000021 2A                     184 	ld	a, (hl+)
+      000022 5F                     185 	ld	e, a
+      000023 56                     186 	ld	d, (hl)
+      000024 F1                     187 	pop	af
+      000025 7B                     188 	ld	a, e
+      000026 DE 00                  189 	sbc	a, #0x00
+      000028 5F                     190 	ld	e, a
+      000029 7A                     191 	ld	a, d
+      00002A DE 00                  192 	sbc	a, #0x00
+      00002C F8 07                  193 	ldhl	sp,	#7
+      00002E 32                     194 	ld	(hl-), a
+      00002F 73                     195 	ld	(hl), e
+      000030 2A                     196 	ld	a, (hl+)
+      000031 5F                     197 	ld	e, a
+      000032 56                     198 	ld	d, (hl)
+      000033 D5                     199 	push	de
+      000034 F8 06                  200 	ldhl	sp,	#6
+      000036 2A                     201 	ld	a, (hl+)
+      000037 5F                     202 	ld	e, a
+      000038 56                     203 	ld	d, (hl)
+      000039 D5                     204 	push	de
+      00003A 11 FF FF               205 	ld	de, #0xffff
+      00003D D5                     206 	push	de
+      00003E 1E 89                  207 	ld	e, #0x89
+      000040 D5                     208 	push	de
+      000041 CDr00r00               209 	call	__mullong
+      000044 E8 08                  210 	add	sp, #8
+      000046 01 00 00               211 	ld	bc, #0x0000
+      000049 C5                     212 	push	bc
+      00004A 01 B3 03               213 	ld	bc, #0x03b3
+      00004D C5                     214 	push	bc
+      00004E E5                     215 	push	hl
+      00004F D5                     216 	push	de
+      000050 CDr00r00               217 	call	__divslong
+      000053 E8 08                  218 	add	sp, #8
+      000055 21 FF 00               219 	ld	hl, #0x00ff
+      000058 19                     220 	add	hl, de
+      000059 5D                     221 	ld	e, l
+      00005A 54                     222 	ld	d, h
+                           00005B   223 	C$main.c$47$1_0$136	= .
+                                    224 	.globl	C$main.c$47$1_0$136
+                                    225 ;src/main.c:47: }
+      00005B E8 08                  226 	add	sp, #8
+                           00005D   227 	C$main.c$47$1_0$136	= .
+                                    228 	.globl	C$main.c$47$1_0$136
+                           00005D   229 	XG$map$0$0	= .
+                                    230 	.globl	XG$map$0$0
+      00005D C9                     231 	ret
+                           00005E   232 	G$update_joy$0$0	= .
+                                    233 	.globl	G$update_joy$0$0
+                           00005E   234 	C$main.c$49$1_0$138	= .
+                                    235 	.globl	C$main.c$49$1_0$138
+                                    236 ;src/main.c:49: void update_joy(void){
+                                    237 ;	---------------------------------
+                                    238 ; Function update_joy
+                                    239 ; ---------------------------------
+      00005E                        240 _update_joy::
+                           00005E   241 	C$main.c$50$1_0$138	= .
+                                    242 	.globl	C$main.c$50$1_0$138
+                                    243 ;src/main.c:50: joy = joypad();
+      00005E CDr00r00               244 	call	_joypad
+      000061 21r85r01               245 	ld	hl, #_joy
+      000064 73                     246 	ld	(hl), e
+                           000065   247 	C$main.c$52$1_0$138	= .
+                                    248 	.globl	C$main.c$52$1_0$138
+                                    249 ;src/main.c:52: if(joy & J_RIGHT){
+      000065 4E                     250 	ld	c, (hl)
+      000066 CB 41                  251 	bit	0, c
+      000068 28 1A                  252 	jr	Z, 00105$
+                           00006A   253 	C$main.c$53$2_0$139	= .
+                                    254 	.globl	C$main.c$53$2_0$139
+                                    255 ;src/main.c:53: if(h_right){
+      00006A 21r7Dr01               256 	ld	hl, #_h_right
+      00006D CB 46                  257 	bit	0, (hl)
+      00006F 28 07                  258 	jr	Z, 00102$
+                           000071   259 	C$main.c$54$3_0$140	= .
+                                    260 	.globl	C$main.c$54$3_0$140
+                                    261 ;src/main.c:54: r_button_down = false;
+      000071 21r81r01               262 	ld	hl, #_r_button_down
+      000074 36 00                  263 	ld	(hl), #0x00
+      000076 18 16                  264 	jr	00106$
+      000078                        265 00102$:
+                           000078   266 	C$main.c$56$3_0$141	= .
+                                    267 	.globl	C$main.c$56$3_0$141
+                                    268 ;src/main.c:56: h_right = true;
+      000078 21r7Dr01               269 	ld	hl, #_h_right
+      00007B 36 01                  270 	ld	(hl), #0x01
+                           00007D   271 	C$main.c$57$3_0$141	= .
+                                    272 	.globl	C$main.c$57$3_0$141
+                                    273 ;src/main.c:57: r_button_down = true;
+      00007D 21r81r01               274 	ld	hl, #_r_button_down
+      000080 36 01                  275 	ld	(hl), #0x01
+      000082 18 0A                  276 	jr	00106$
+      000084                        277 00105$:
+                           000084   278 	C$main.c$60$2_0$142	= .
+                                    279 	.globl	C$main.c$60$2_0$142
+                                    280 ;src/main.c:60: h_right = false;
+      000084 21r7Dr01               281 	ld	hl, #_h_right
+      000087 36 00                  282 	ld	(hl), #0x00
+                           000089   283 	C$main.c$61$2_0$142	= .
+                                    284 	.globl	C$main.c$61$2_0$142
+                                    285 ;src/main.c:61: r_button_down = false;
+      000089 21r81r01               286 	ld	hl, #_r_button_down
+      00008C 36 00                  287 	ld	(hl), #0x00
+      00008E                        288 00106$:
+                           00008E   289 	C$main.c$64$1_0$138	= .
+                                    290 	.globl	C$main.c$64$1_0$138
+                                    291 ;src/main.c:64: if(joy & J_LEFT){
+      00008E CB 49                  292 	bit	1, c
+      000090 28 1A                  293 	jr	Z, 00111$
+                           000092   294 	C$main.c$65$2_0$143	= .
+                                    295 	.globl	C$main.c$65$2_0$143
+                                    296 ;src/main.c:65: if(h_left){
+      000092 21r7Er01               297 	ld	hl, #_h_left
+      000095 CB 46                  298 	bit	0, (hl)
+      000097 28 07                  299 	jr	Z, 00108$
+                           000099   300 	C$main.c$66$3_0$144	= .
+                                    301 	.globl	C$main.c$66$3_0$144
+                                    302 ;src/main.c:66: l_button_down = false;
+      000099 21r82r01               303 	ld	hl, #_l_button_down
+      00009C 36 00                  304 	ld	(hl), #0x00
+      00009E 18 16                  305 	jr	00112$
+      0000A0                        306 00108$:
+                           0000A0   307 	C$main.c$68$3_0$145	= .
+                                    308 	.globl	C$main.c$68$3_0$145
+                                    309 ;src/main.c:68: h_left = true;
+      0000A0 21r7Er01               310 	ld	hl, #_h_left
+      0000A3 36 01                  311 	ld	(hl), #0x01
+                           0000A5   312 	C$main.c$69$3_0$145	= .
+                                    313 	.globl	C$main.c$69$3_0$145
+                                    314 ;src/main.c:69: l_button_down = true;
+      0000A5 21r82r01               315 	ld	hl, #_l_button_down
+      0000A8 36 01                  316 	ld	(hl), #0x01
+      0000AA 18 0A                  317 	jr	00112$
+      0000AC                        318 00111$:
+                           0000AC   319 	C$main.c$72$2_0$146	= .
+                                    320 	.globl	C$main.c$72$2_0$146
+                                    321 ;src/main.c:72: h_left = false;
+      0000AC 21r7Er01               322 	ld	hl, #_h_left
+      0000AF 36 00                  323 	ld	(hl), #0x00
+                           0000B1   324 	C$main.c$73$2_0$146	= .
+                                    325 	.globl	C$main.c$73$2_0$146
+                                    326 ;src/main.c:73: l_button_down = false;
+      0000B1 21r82r01               327 	ld	hl, #_l_button_down
+      0000B4 36 00                  328 	ld	(hl), #0x00
+      0000B6                        329 00112$:
+                           0000B6   330 	C$main.c$76$1_0$138	= .
+                                    331 	.globl	C$main.c$76$1_0$138
+                                    332 ;src/main.c:76: if(joy & J_A){
+      0000B6 CB 61                  333 	bit	4, c
+      0000B8 28 1A                  334 	jr	Z, 00117$
+                           0000BA   335 	C$main.c$77$2_0$147	= .
+                                    336 	.globl	C$main.c$77$2_0$147
+                                    337 ;src/main.c:77: if(h_a){
+      0000BA 21r7Fr01               338 	ld	hl, #_h_a
+      0000BD CB 46                  339 	bit	0, (hl)
+      0000BF 28 07                  340 	jr	Z, 00114$
+                           0000C1   341 	C$main.c$78$3_0$148	= .
+                                    342 	.globl	C$main.c$78$3_0$148
+                                    343 ;src/main.c:78: a_button_down = false;
+      0000C1 21r83r01               344 	ld	hl, #_a_button_down
+      0000C4 36 00                  345 	ld	(hl), #0x00
+      0000C6 18 16                  346 	jr	00118$
+      0000C8                        347 00114$:
+                           0000C8   348 	C$main.c$80$3_0$149	= .
+                                    349 	.globl	C$main.c$80$3_0$149
+                                    350 ;src/main.c:80: h_a = true;
+      0000C8 21r7Fr01               351 	ld	hl, #_h_a
+      0000CB 36 01                  352 	ld	(hl), #0x01
+                           0000CD   353 	C$main.c$81$3_0$149	= .
+                                    354 	.globl	C$main.c$81$3_0$149
+                                    355 ;src/main.c:81: a_button_down = true;
+      0000CD 21r83r01               356 	ld	hl, #_a_button_down
+      0000D0 36 01                  357 	ld	(hl), #0x01
+      0000D2 18 0A                  358 	jr	00118$
+      0000D4                        359 00117$:
+                           0000D4   360 	C$main.c$84$2_0$150	= .
+                                    361 	.globl	C$main.c$84$2_0$150
+                                    362 ;src/main.c:84: h_a = false;
+      0000D4 21r7Fr01               363 	ld	hl, #_h_a
+      0000D7 36 00                  364 	ld	(hl), #0x00
+                           0000D9   365 	C$main.c$85$2_0$150	= .
+                                    366 	.globl	C$main.c$85$2_0$150
+                                    367 ;src/main.c:85: a_button_down = false;
+      0000D9 21r83r01               368 	ld	hl, #_a_button_down
+      0000DC 36 00                  369 	ld	(hl), #0x00
+      0000DE                        370 00118$:
+                           0000DE   371 	C$main.c$88$1_0$138	= .
+                                    372 	.globl	C$main.c$88$1_0$138
+                                    373 ;src/main.c:88: if(joy & J_B){
+      0000DE CB 69                  374 	bit	5, c
+      0000E0 28 18                  375 	jr	Z, 00123$
+                           0000E2   376 	C$main.c$89$2_0$151	= .
+                                    377 	.globl	C$main.c$89$2_0$151
+                                    378 ;src/main.c:89: if(h_b){
+      0000E2 21r80r01               379 	ld	hl, #_h_b
+      0000E5 CB 46                  380 	bit	0, (hl)
+      0000E7 28 06                  381 	jr	Z, 00120$
+                           0000E9   382 	C$main.c$90$3_0$152	= .
+                                    383 	.globl	C$main.c$90$3_0$152
+                                    384 ;src/main.c:90: b_button_down = false;
+      0000E9 21r84r01               385 	ld	hl, #_b_button_down
+      0000EC 36 00                  386 	ld	(hl), #0x00
+      0000EE C9                     387 	ret
+      0000EF                        388 00120$:
+                           0000EF   389 	C$main.c$92$3_0$153	= .
+                                    390 	.globl	C$main.c$92$3_0$153
+                                    391 ;src/main.c:92: h_b = true;
+      0000EF 21r80r01               392 	ld	hl, #_h_b
+      0000F2 36 01                  393 	ld	(hl), #0x01
+                           0000F4   394 	C$main.c$93$3_0$153	= .
+                                    395 	.globl	C$main.c$93$3_0$153
+                                    396 ;src/main.c:93: b_button_down = true;
+      0000F4 21r84r01               397 	ld	hl, #_b_button_down
+      0000F7 36 01                  398 	ld	(hl), #0x01
+      0000F9 C9                     399 	ret
+      0000FA                        400 00123$:
+                           0000FA   401 	C$main.c$96$2_0$154	= .
+                                    402 	.globl	C$main.c$96$2_0$154
+                                    403 ;src/main.c:96: h_b = false;
+      0000FA 21r80r01               404 	ld	hl, #_h_b
+      0000FD 36 00                  405 	ld	(hl), #0x00
+                           0000FF   406 	C$main.c$97$2_0$154	= .
+                                    407 	.globl	C$main.c$97$2_0$154
+                                    408 ;src/main.c:97: b_button_down = false;
+      0000FF 21r84r01               409 	ld	hl, #_b_button_down
+      000102 36 00                  410 	ld	(hl), #0x00
+                           000104   411 	C$main.c$99$1_0$138	= .
+                                    412 	.globl	C$main.c$99$1_0$138
+                                    413 ;src/main.c:99: }
+                           000104   414 	C$main.c$99$1_0$138	= .
+                                    415 	.globl	C$main.c$99$1_0$138
+                           000104   416 	XG$update_joy$0$0	= .
+                                    417 	.globl	XG$update_joy$0$0
+      000104 C9                     418 	ret
+                           000105   419 	G$next_page$0$0	= .
+                                    420 	.globl	G$next_page$0$0
+                           000105   421 	C$main.c$101$1_0$156	= .
+                                    422 	.globl	C$main.c$101$1_0$156
+                                    423 ;src/main.c:101: void next_page(void){
+                                    424 ;	---------------------------------
+                                    425 ; Function next_page
+                                    426 ; ---------------------------------
+      000105                        427 _next_page::
+                           000105   428 	C$main.c$102$1_0$156	= .
+                                    429 	.globl	C$main.c$102$1_0$156
+                                    430 ;src/main.c:102: if(current_page.next_bank == NULL) return;
+      000105 21r08r00               431 	ld	hl, #_current_page + 6
+      000108 2A                     432 	ld	a, (hl+)
+      000109 4F                     433 	ld	c,a
+      00010A B6                     434 	or	a,(hl)
+      00010B C8                     435 	ret	Z
+                           00010C   436 	C$main.c$103$1_0$156	= .
+                                    437 	.globl	C$main.c$103$1_0$156
+                                    438 ;src/main.c:103: SWITCH_ROM(current_page.next_bank);
+      00010C 79                     439 	ld	a, c
+      00010D E0r00                  440 	ldh	(__current_bank + 0), a
+      00010F EA 00 20               441 	ld	(#0x2000),a
+                           000112   442 	C$main.c$104$1_0$156	= .
+                                    443 	.globl	C$main.c$104$1_0$156
+                                    444 ;src/main.c:104: current_page = *(page_t*)(current_page.next_ofs);
+      000112 21r06r00               445 	ld	hl, #(_current_page + 4)
+      000115 2A                     446 	ld	a, (hl+)
+      000116 4F                     447 	ld	c, a
+      000117 46                     448 	ld	b, (hl)
+      000118 11 70 01               449 	ld	de, #0x0170
+      00011B D5                     450 	push	de
+      00011C C5                     451 	push	bc
+      00011D 11r02r00               452 	ld	de, #_current_page
+      000120 D5                     453 	push	de
+      000121 CDr00r00               454 	call	___memcpy
+      000124 E8 06                  455 	add	sp, #6
+                           000126   456 	C$main.c$105$1_0$156	= .
+                                    457 	.globl	C$main.c$105$1_0$156
+                                    458 ;src/main.c:105: set_bkg_tiles(0, 0, 20, 18, current_page.page_data);
+      000126 11r0Ar00               459 	ld	de, #(_current_page + 8)
+      000129 D5                     460 	push	de
+      00012A 21 14 12               461 	ld	hl, #0x1214
+      00012D E5                     462 	push	hl
+      00012E AF                     463 	xor	a, a
+      00012F 0F                     464 	rrca
+      000130 F5                     465 	push	af
+      000131 CDr00r00               466 	call	_set_bkg_tiles
+      000134 E8 06                  467 	add	sp, #6
+                           000136   468 	C$main.c$106$1_0$156	= .
+                                    469 	.globl	C$main.c$106$1_0$156
+                                    470 ;src/main.c:106: page_number++;
+      000136 21r72r01               471 	ld	hl, #_page_number
+      000139 34                     472 	inc	(hl)
+      00013A C0                     473 	ret	NZ
+      00013B 23                     474 	inc	hl
+      00013C 34                     475 	inc	(hl)
+                           00013D   476 	C$main.c$107$1_0$156	= .
+                                    477 	.globl	C$main.c$107$1_0$156
+                                    478 ;src/main.c:107: }
+                           00013D   479 	C$main.c$107$1_0$156	= .
+                                    480 	.globl	C$main.c$107$1_0$156
+                           00013D   481 	XG$next_page$0$0	= .
+                                    482 	.globl	XG$next_page$0$0
+      00013D C9                     483 	ret
+                           00013E   484 	G$prev_page$0$0	= .
+                                    485 	.globl	G$prev_page$0$0
+                           00013E   486 	C$main.c$109$1_0$158	= .
+                                    487 	.globl	C$main.c$109$1_0$158
+                                    488 ;src/main.c:109: void prev_page(void){
+                                    489 ;	---------------------------------
+                                    490 ; Function prev_page
+                                    491 ; ---------------------------------
+      00013E                        492 _prev_page::
+                           00013E   493 	C$main.c$110$1_0$158	= .
+                                    494 	.globl	C$main.c$110$1_0$158
+                                    495 ;src/main.c:110: if(current_page.prev_bank == NULL) return;
+      00013E 21r04r00               496 	ld	hl, #_current_page + 2
+      000141 2A                     497 	ld	a, (hl+)
+      000142 4F                     498 	ld	c,a
+      000143 B6                     499 	or	a,(hl)
+      000144 C8                     500 	ret	Z
+                           000145   501 	C$main.c$111$1_0$158	= .
+                                    502 	.globl	C$main.c$111$1_0$158
+                                    503 ;src/main.c:111: SWITCH_ROM(current_page.prev_bank);
+      000145 79                     504 	ld	a, c
+      000146 E0r00                  505 	ldh	(__current_bank + 0), a
+      000148 EA 00 20               506 	ld	(#0x2000),a
+                           00014B   507 	C$main.c$112$1_0$158	= .
+                                    508 	.globl	C$main.c$112$1_0$158
+                                    509 ;src/main.c:112: current_page = *(page_t*)(current_page.prev_ofs);
+      00014B 21r02r00               510 	ld	hl, #_current_page
+      00014E 2A                     511 	ld	a, (hl+)
+      00014F 4F                     512 	ld	c, a
+      000150 46                     513 	ld	b, (hl)
+      000151 11 70 01               514 	ld	de, #0x0170
+      000154 D5                     515 	push	de
+      000155 C5                     516 	push	bc
+      000156 11r02r00               517 	ld	de, #_current_page
+      000159 D5                     518 	push	de
+      00015A CDr00r00               519 	call	___memcpy
+      00015D E8 06                  520 	add	sp, #6
+                           00015F   521 	C$main.c$113$1_0$158	= .
+                                    522 	.globl	C$main.c$113$1_0$158
+                                    523 ;src/main.c:113: set_bkg_tiles(0, 0, 20, 18, current_page.page_data);
+      00015F 11r0Ar00               524 	ld	de, #(_current_page + 8)
+      000162 D5                     525 	push	de
+      000163 21 14 12               526 	ld	hl, #0x1214
+      000166 E5                     527 	push	hl
+      000167 AF                     528 	xor	a, a
+      000168 0F                     529 	rrca
+      000169 F5                     530 	push	af
+      00016A CDr00r00               531 	call	_set_bkg_tiles
+      00016D E8 06                  532 	add	sp, #6
+                           00016F   533 	C$main.c$114$1_0$158	= .
+                                    534 	.globl	C$main.c$114$1_0$158
+                                    535 ;src/main.c:114: page_number--;
+      00016F 21r72r01               536 	ld	hl, #_page_number
+      000172 2A                     537 	ld	a, (hl+)
+      000173 5F                     538 	ld	e, a
+      000174 3A                     539 	ld	a, (hl-)
+      000175 57                     540 	ld	d, a
+      000176 1B                     541 	dec	de
+      000177 7B                     542 	ld	a, e
+      000178 22                     543 	ld	(hl+), a
+      000179 72                     544 	ld	(hl), d
+                           00017A   545 	C$main.c$115$1_0$158	= .
+                                    546 	.globl	C$main.c$115$1_0$158
+                                    547 ;src/main.c:115: }
+                           00017A   548 	C$main.c$115$1_0$158	= .
+                                    549 	.globl	C$main.c$115$1_0$158
+                           00017A   550 	XG$prev_page$0$0	= .
+                                    551 	.globl	XG$prev_page$0$0
+      00017A C9                     552 	ret
+                           00017B   553 	G$resolve_jumping_point$0$0	= .
+                                    554 	.globl	G$resolve_jumping_point$0$0
+                           00017B   555 	C$main.c$117$1_0$160	= .
+                                    556 	.globl	C$main.c$117$1_0$160
+                                    557 ;src/main.c:117: void resolve_jumping_point(void){
+                                    558 ;	---------------------------------
+                                    559 ; Function resolve_jumping_point
+                                    560 ; ---------------------------------
+      00017B                        561 _resolve_jumping_point::
+      00017B E8 FC                  562 	add	sp, #-4
+                           00017D   563 	C$main.c$119$1_0$160	= .
+                                    564 	.globl	C$main.c$119$1_0$160
+                                    565 ;src/main.c:119: if(page_number < 238){
+      00017D FAr72r01               566 	ld	a, (#_page_number)
+      000180 F8 00                  567 	ldhl	sp,	#0
+      000182 77                     568 	ld	(hl), a
+      000183 FAr73r01               569 	ld	a, (#_page_number + 1)
+      000186 F8 01                  570 	ldhl	sp,	#1
+      000188 32                     571 	ld	(hl-), a
+      000189 2A                     572 	ld	a, (hl+)
+      00018A D6 EE                  573 	sub	a, #0xee
+      00018C 7E                     574 	ld	a, (hl)
+      00018D DE 00                  575 	sbc	a, #0x00
+      00018F 30 2A                  576 	jr	NC, 00102$
+                           000191   577 	C$main.c$121$2_0$161	= .
+                                    578 	.globl	C$main.c$121$2_0$161
+                                    579 ;src/main.c:121: SWITCH_ROM( BANK(gatsby_1) );
+      000191 3Er00                  580 	ld	a, #<(___bank_gatsby_1)
+      000193 E0r00                  581 	ldh	(__current_bank + 0), a
+      000195 3Er00                  582 	ld	a, #<(___bank_gatsby_1)
+      000197 EA 00 20               583 	ld	(#0x2000),a
+                           00019A   584 	C$main.c$122$2_0$161	= .
+                                    585 	.globl	C$main.c$122$2_0$161
+                                    586 ;src/main.c:122: current_page = page_1;
+      00019A 11 70 01               587 	ld	de, #0x0170
+      00019D D5                     588 	push	de
+      00019E 11r00r00               589 	ld	de, #_page_1
+      0001A1 D5                     590 	push	de
+      0001A2 11r02r00               591 	ld	de, #_current_page
+      0001A5 D5                     592 	push	de
+      0001A6 CDr00r00               593 	call	___memcpy
+      0001A9 E8 06                  594 	add	sp, #6
+                           0001AB   595 	C$main.c$123$2_0$161	= .
+                                    596 	.globl	C$main.c$123$2_0$161
+                                    597 ;src/main.c:123: i = 1;
+      0001AB 21r89r01               598 	ld	hl, #_i
+      0001AE 3E 01                  599 	ld	a, #0x01
+      0001B0 22                     600 	ld	(hl+), a
+      0001B1 AF                     601 	xor	a, a
+      0001B2 77                     602 	ld	(hl), a
+                           0001B3   603 	C$main.c$124$2_0$161	= .
+                                    604 	.globl	C$main.c$124$2_0$161
+                                    605 ;src/main.c:124: forward = true;
+      0001B3 21r8Br01               606 	ld	hl, #_forward
+      0001B6 36 01                  607 	ld	(hl), #0x01
+                           0001B8   608 	C$main.c$125$2_0$161	= .
+                                    609 	.globl	C$main.c$125$2_0$161
+                                    610 ;src/main.c:125: return;
+      0001B8 C3r9Er02               611 	jp	00113$
+      0001BB                        612 00102$:
+                           0001BB   613 	C$main.c$127$1_0$160	= .
+                                    614 	.globl	C$main.c$127$1_0$160
+                                    615 ;src/main.c:127: if(page_number > 711){
+      0001BB F8 00                  616 	ldhl	sp,	#0
+      0001BD 3E C7                  617 	ld	a, #0xc7
+      0001BF 96                     618 	sub	a, (hl)
+      0001C0 23                     619 	inc	hl
+      0001C1 3E 02                  620 	ld	a, #0x02
+      0001C3 9E                     621 	sbc	a, (hl)
+      0001C4 30 2A                  622 	jr	NC, 00104$
+                           0001C6   623 	C$main.c$129$2_0$162	= .
+                                    624 	.globl	C$main.c$129$2_0$162
+                                    625 ;src/main.c:129: SWITCH_ROM( BANK(gatsby_948) );
+      0001C6 3Er00                  626 	ld	a, #<(___bank_gatsby_948)
+      0001C8 E0r00                  627 	ldh	(__current_bank + 0), a
+      0001CA 3Er00                  628 	ld	a, #<(___bank_gatsby_948)
+      0001CC EA 00 20               629 	ld	(#0x2000),a
+                           0001CF   630 	C$main.c$130$2_0$162	= .
+                                    631 	.globl	C$main.c$130$2_0$162
+                                    632 ;src/main.c:130: current_page = page_948;
+      0001CF 11 70 01               633 	ld	de, #0x0170
+      0001D2 D5                     634 	push	de
+      0001D3 11r00r00               635 	ld	de, #_page_948
+      0001D6 D5                     636 	push	de
+      0001D7 11r02r00               637 	ld	de, #_current_page
+      0001DA D5                     638 	push	de
+      0001DB CDr00r00               639 	call	___memcpy
+      0001DE E8 06                  640 	add	sp, #6
+                           0001E0   641 	C$main.c$131$2_0$162	= .
+                                    642 	.globl	C$main.c$131$2_0$162
+                                    643 ;src/main.c:131: i = 948;
+      0001E0 21r89r01               644 	ld	hl, #_i
+      0001E3 3E B4                  645 	ld	a, #0xb4
+      0001E5 22                     646 	ld	(hl+), a
+      0001E6 36 03                  647 	ld	(hl), #0x03
+                           0001E8   648 	C$main.c$132$2_0$162	= .
+                                    649 	.globl	C$main.c$132$2_0$162
+                                    650 ;src/main.c:132: forward = false;
+      0001E8 21r8Br01               651 	ld	hl, #_forward
+      0001EB 36 00                  652 	ld	(hl), #0x00
+                           0001ED   653 	C$main.c$133$2_0$162	= .
+                                    654 	.globl	C$main.c$133$2_0$162
+                                    655 ;src/main.c:133: return;
+      0001ED C3r9Er02               656 	jp	00113$
+      0001F0                        657 00104$:
+                           0001F0   658 	C$main.c$136$1_0$160	= .
+                                    659 	.globl	C$main.c$136$1_0$160
+                                    660 ;src/main.c:136: if(page_number > page_number_temp - 237 && page_number < page_number_temp){
+      0001F0 21r74r01               661 	ld	hl, #_page_number_temp
+      0001F3 2A                     662 	ld	a, (hl+)
+      0001F4 4F                     663 	ld	c, a
+                           0001F5   664 	C$main.c$138$1_0$160	= .
+                                    665 	.globl	C$main.c$138$1_0$160
+                                    666 ;src/main.c:138: i = page_number_temp;
+      0001F5 3A                     667 	ld	a, (hl-)
+      0001F6 47                     668 	ld	b, a
+      0001F7 79                     669 	ld	a, c
+      0001F8 C6 13                  670 	add	a, #0x13
+      0001FA 5F                     671 	ld	e, a
+      0001FB 78                     672 	ld	a, b
+      0001FC CE FF                  673 	adc	a, #0xff
+      0001FE 57                     674 	ld	d, a
+      0001FF 7E                     675 	ld	a, (hl)
+      000200 F8 02                  676 	ldhl	sp,	#2
+      000202 77                     677 	ld	(hl), a
+      000203 FAr75r01               678 	ld	a, (#_page_number_temp + 1)
+      000206 F8 03                  679 	ldhl	sp,	#3
+      000208 77                     680 	ld	(hl), a
+                           000209   681 	C$main.c$136$1_0$160	= .
+                                    682 	.globl	C$main.c$136$1_0$160
+                                    683 ;src/main.c:136: if(page_number > page_number_temp - 237 && page_number < page_number_temp){
+      000209 F8 00                  684 	ldhl	sp,	#0
+      00020B 7B                     685 	ld	a, e
+      00020C 96                     686 	sub	a, (hl)
+      00020D 23                     687 	inc	hl
+      00020E 7A                     688 	ld	a, d
+      00020F 9E                     689 	sbc	a, (hl)
+      000210 30 21                  690 	jr	NC, 00106$
+      000212 11r72r01               691 	ld	de, #_page_number
+      000215 21r74r01               692 	ld	hl, #_page_number_temp
+      000218 1A                     693 	ld	a, (de)
+      000219 13                     694 	inc	de
+      00021A 96                     695 	sub	a, (hl)
+      00021B 23                     696 	inc	hl
+      00021C 1A                     697 	ld	a, (de)
+      00021D 9E                     698 	sbc	a, (hl)
+      00021E 30 13                  699 	jr	NC, 00106$
+                           000220   700 	C$main.c$138$2_0$163	= .
+                                    701 	.globl	C$main.c$138$2_0$163
+                                    702 ;src/main.c:138: i = page_number_temp;
+      000220 F8 02                  703 	ldhl	sp,	#2
+      000222 7E                     704 	ld	a, (hl)
+      000223 EAr89r01               705 	ld	(#_i),a
+      000226 F8 03                  706 	ldhl	sp,	#3
+      000228 7E                     707 	ld	a, (hl)
+      000229 EAr8Ar01               708 	ld	(#_i + 1),a
+                           00022C   709 	C$main.c$139$2_0$163	= .
+                                    710 	.globl	C$main.c$139$2_0$163
+                                    711 ;src/main.c:139: forward = false;
+      00022C 21r8Br01               712 	ld	hl, #_forward
+      00022F 36 00                  713 	ld	(hl), #0x00
+                           000231   714 	C$main.c$140$2_0$163	= .
+                                    715 	.globl	C$main.c$140$2_0$163
+                                    716 ;src/main.c:140: return;
+      000231 18 6B                  717 	jr	00113$
+      000233                        718 00106$:
+                           000233   719 	C$main.c$142$1_0$160	= .
+                                    720 	.globl	C$main.c$142$1_0$160
+                                    721 ;src/main.c:142: if(page_number < page_number_temp + 237 && page_number > page_number_temp){
+      000233 21 ED 00               722 	ld	hl, #0x00ed
+      000236 09                     723 	add	hl, bc
+      000237 4D                     724 	ld	c, l
+      000238 44                     725 	ld	b, h
+      000239 F8 00                  726 	ldhl	sp,	#0
+      00023B 2A                     727 	ld	a, (hl+)
+      00023C 91                     728 	sub	a, c
+      00023D 7E                     729 	ld	a, (hl)
+      00023E 98                     730 	sbc	a, b
+      00023F 30 21                  731 	jr	NC, 00109$
+      000241 11r74r01               732 	ld	de, #_page_number_temp
+      000244 21r72r01               733 	ld	hl, #_page_number
+      000247 1A                     734 	ld	a, (de)
+      000248 13                     735 	inc	de
+      000249 96                     736 	sub	a, (hl)
+      00024A 23                     737 	inc	hl
+      00024B 1A                     738 	ld	a, (de)
+      00024C 9E                     739 	sbc	a, (hl)
+      00024D 30 13                  740 	jr	NC, 00109$
+                           00024F   741 	C$main.c$143$2_0$164	= .
+                                    742 	.globl	C$main.c$143$2_0$164
+                                    743 ;src/main.c:143: i = page_number_temp;
+      00024F F8 02                  744 	ldhl	sp,	#2
+      000251 7E                     745 	ld	a, (hl)
+      000252 EAr89r01               746 	ld	(#_i),a
+      000255 F8 03                  747 	ldhl	sp,	#3
+      000257 7E                     748 	ld	a, (hl)
+      000258 EAr8Ar01               749 	ld	(#_i + 1),a
+                           00025B   750 	C$main.c$144$2_0$164	= .
+                                    751 	.globl	C$main.c$144$2_0$164
+                                    752 ;src/main.c:144: forward = true;
+      00025B 21r8Br01               753 	ld	hl, #_forward
+      00025E 36 01                  754 	ld	(hl), #0x01
+                           000260   755 	C$main.c$145$2_0$164	= .
+                                    756 	.globl	C$main.c$145$2_0$164
+                                    757 ;src/main.c:145: return;
+      000260 18 3C                  758 	jr	00113$
+      000262                        759 00109$:
+                           000262   760 	C$main.c$148$1_0$160	= .
+                                    761 	.globl	C$main.c$148$1_0$160
+                                    762 ;src/main.c:148: SWITCH_ROM( BANK(gatsby_474) );
+      000262 3Er00                  763 	ld	a, #<(___bank_gatsby_474)
+      000264 E0r00                  764 	ldh	(__current_bank + 0), a
+      000266 3Er00                  765 	ld	a, #<(___bank_gatsby_474)
+      000268 EA 00 20               766 	ld	(#0x2000),a
+                           00026B   767 	C$main.c$149$1_0$160	= .
+                                    768 	.globl	C$main.c$149$1_0$160
+                                    769 ;src/main.c:149: current_page = page_474;
+      00026B 11 70 01               770 	ld	de, #0x0170
+      00026E D5                     771 	push	de
+      00026F 11r00r00               772 	ld	de, #_page_474
+      000272 D5                     773 	push	de
+      000273 11r02r00               774 	ld	de, #_current_page
+      000276 D5                     775 	push	de
+      000277 CDr00r00               776 	call	___memcpy
+      00027A E8 06                  777 	add	sp, #6
+                           00027C   778 	C$main.c$150$1_0$160	= .
+                                    779 	.globl	C$main.c$150$1_0$160
+                                    780 ;src/main.c:150: i = 474;
+      00027C 21r89r01               781 	ld	hl, #_i
+      00027F 3E DA                  782 	ld	a, #0xda
+      000281 22                     783 	ld	(hl+), a
+      000282 36 01                  784 	ld	(hl), #0x01
+                           000284   785 	C$main.c$151$1_0$160	= .
+                                    786 	.globl	C$main.c$151$1_0$160
+                                    787 ;src/main.c:151: if(page_number <= 474){
+      000284 21r72r01               788 	ld	hl, #_page_number
+      000287 2A                     789 	ld	a, (hl+)
+      000288 4F                     790 	ld	c, a
+      000289 46                     791 	ld	b, (hl)
+      00028A 3E DA                  792 	ld	a, #0xda
+      00028C B9                     793 	cp	a, c
+      00028D 3E 01                  794 	ld	a, #0x01
+      00028F 98                     795 	sbc	a, b
+      000290 38 07                  796 	jr	C, 00112$
+                           000292   797 	C$main.c$152$2_0$165	= .
+                                    798 	.globl	C$main.c$152$2_0$165
+                                    799 ;src/main.c:152: forward = false;
+      000292 21r8Br01               800 	ld	hl, #_forward
+      000295 36 00                  801 	ld	(hl), #0x00
+                           000297   802 	C$main.c$153$2_0$165	= .
+                                    803 	.globl	C$main.c$153$2_0$165
+                                    804 ;src/main.c:153: return;
+      000297 18 05                  805 	jr	00113$
+      000299                        806 00112$:
+                           000299   807 	C$main.c$155$1_0$160	= .
+                                    808 	.globl	C$main.c$155$1_0$160
+                                    809 ;src/main.c:155: forward = true;    
+      000299 21r8Br01               810 	ld	hl, #_forward
+      00029C 36 01                  811 	ld	(hl), #0x01
+      00029E                        812 00113$:
+                           00029E   813 	C$main.c$157$1_0$160	= .
+                                    814 	.globl	C$main.c$157$1_0$160
+                                    815 ;src/main.c:157: }
+      00029E E8 04                  816 	add	sp, #4
+                           0002A0   817 	C$main.c$157$1_0$160	= .
+                                    818 	.globl	C$main.c$157$1_0$160
+                           0002A0   819 	XG$resolve_jumping_point$0$0	= .
+                                    820 	.globl	XG$resolve_jumping_point$0$0
+      0002A0 C9                     821 	ret
+                           0002A1   822 	G$jump_page$0$0	= .
+                                    823 	.globl	G$jump_page$0$0
+                           0002A1   824 	C$main.c$159$1_0$167	= .
+                                    825 	.globl	C$main.c$159$1_0$167
+                                    826 ;src/main.c:159: void jump_page(void){
+                                    827 ;	---------------------------------
+                                    828 ; Function jump_page
+                                    829 ; ---------------------------------
+      0002A1                        830 _jump_page::
+                           0002A1   831 	C$main.c$161$1_0$167	= .
+                                    832 	.globl	C$main.c$161$1_0$167
+                                    833 ;src/main.c:161: if(page_number == page_number_temp) return;
+      0002A1 FAr72r01               834 	ld	a, (#_page_number)
+      0002A4 21r74r01               835 	ld	hl, #_page_number_temp
+      0002A7 96                     836 	sub	a, (hl)
+      0002A8 20 0A                  837 	jr	NZ, 00102$
+      0002AA FAr73r01               838 	ld	a, (#_page_number + 1)
+      0002AD 21r75r01               839 	ld	hl, #_page_number_temp + 1
+      0002B0 96                     840 	sub	a, (hl)
+      0002B1 C8                     841 	ret	Z
+      0002B2 18 00                  842 	jr	00102$
+      0002B4                        843 00102$:
+                           0002B4   844 	C$main.c$163$1_0$167	= .
+                                    845 	.globl	C$main.c$163$1_0$167
+                                    846 ;src/main.c:163: resolve_jumping_point();
+      0002B4 CDr7Br01               847 	call	_resolve_jumping_point
+                           0002B7   848 	C$main.c$171$3_0$169	= .
+                                    849 	.globl	C$main.c$171$3_0$169
+                                    850 ;src/main.c:171: while(i != page_number){
+      0002B7                        851 00106$:
+      0002B7 FAr89r01               852 	ld	a, (#_i)
+      0002BA 21r72r01               853 	ld	hl, #_page_number
+      0002BD 96                     854 	sub	a, (hl)
+      0002BE 20 09                  855 	jr	NZ, 00133$
+      0002C0 FAr8Ar01               856 	ld	a, (#_i + 1)
+      0002C3 21r73r01               857 	ld	hl, #_page_number + 1
+      0002C6 96                     858 	sub	a, (hl)
+      0002C7 28 56                  859 	jr	Z, 00108$
+      0002C9                        860 00133$:
+                           0002C9   861 	C$main.c$172$2_0$168	= .
+                                    862 	.globl	C$main.c$172$2_0$168
+                                    863 ;src/main.c:172: if(forward){
+      0002C9 21r8Br01               864 	ld	hl, #_forward
+      0002CC CB 46                  865 	bit	0, (hl)
+      0002CE 28 26                  866 	jr	Z, 00104$
+                           0002D0   867 	C$main.c$173$3_0$169	= .
+                                    868 	.globl	C$main.c$173$3_0$169
+                                    869 ;src/main.c:173: SWITCH_ROM(current_page.next_bank);
+      0002D0 FAr08r00               870 	ld	a, (#(_current_page + 6) + 0)
+      0002D3 E0r00                  871 	ldh	(__current_bank + 0), a
+      0002D5 EA 00 20               872 	ld	(#0x2000),a
+                           0002D8   873 	C$main.c$174$3_0$169	= .
+                                    874 	.globl	C$main.c$174$3_0$169
+                                    875 ;src/main.c:174: current_page = *(page_t*)(current_page.next_ofs);
+      0002D8 21r06r00               876 	ld	hl, #(_current_page + 4)
+      0002DB 2A                     877 	ld	a, (hl+)
+      0002DC 4F                     878 	ld	c, a
+      0002DD 46                     879 	ld	b, (hl)
+      0002DE 11 70 01               880 	ld	de, #0x0170
+      0002E1 D5                     881 	push	de
+      0002E2 C5                     882 	push	bc
+      0002E3 11r02r00               883 	ld	de, #_current_page
+      0002E6 D5                     884 	push	de
+      0002E7 CDr00r00               885 	call	___memcpy
+      0002EA E8 06                  886 	add	sp, #6
+                           0002EC   887 	C$main.c$175$3_0$169	= .
+                                    888 	.globl	C$main.c$175$3_0$169
+                                    889 ;src/main.c:175: i++;
+      0002EC 21r89r01               890 	ld	hl, #_i
+      0002EF 34                     891 	inc	(hl)
+      0002F0 20 C5                  892 	jr	NZ, 00106$
+      0002F2 23                     893 	inc	hl
+      0002F3 34                     894 	inc	(hl)
+                           0002F4   895 	C$main.c$176$3_0$169	= .
+                                    896 	.globl	C$main.c$176$3_0$169
+                                    897 ;src/main.c:176: continue;
+      0002F4 18 C1                  898 	jr	00106$
+      0002F6                        899 00104$:
+                           0002F6   900 	C$main.c$178$3_0$170	= .
+                                    901 	.globl	C$main.c$178$3_0$170
+                                    902 ;src/main.c:178: SWITCH_ROM(current_page.prev_bank);
+      0002F6 FAr04r00               903 	ld	a, (#(_current_page + 2) + 0)
+      0002F9 E0r00                  904 	ldh	(__current_bank + 0), a
+      0002FB EA 00 20               905 	ld	(#0x2000),a
+                           0002FE   906 	C$main.c$179$3_0$170	= .
+                                    907 	.globl	C$main.c$179$3_0$170
+                                    908 ;src/main.c:179: current_page = *(page_t*)(current_page.prev_ofs);
+      0002FE 21r02r00               909 	ld	hl, #_current_page
+      000301 2A                     910 	ld	a, (hl+)
+      000302 4F                     911 	ld	c, a
+      000303 46                     912 	ld	b, (hl)
+      000304 11 70 01               913 	ld	de, #0x0170
+      000307 D5                     914 	push	de
+      000308 C5                     915 	push	bc
+      000309 11r02r00               916 	ld	de, #_current_page
+      00030C D5                     917 	push	de
+      00030D CDr00r00               918 	call	___memcpy
+      000310 E8 06                  919 	add	sp, #6
+                           000312   920 	C$main.c$180$3_0$170	= .
+                                    921 	.globl	C$main.c$180$3_0$170
+                                    922 ;src/main.c:180: i--;
+      000312 21r89r01               923 	ld	hl, #_i
+      000315 2A                     924 	ld	a, (hl+)
+      000316 5F                     925 	ld	e, a
+      000317 3A                     926 	ld	a, (hl-)
+      000318 57                     927 	ld	d, a
+      000319 1B                     928 	dec	de
+      00031A 7B                     929 	ld	a, e
+      00031B 22                     930 	ld	(hl+), a
+      00031C 72                     931 	ld	(hl), d
+                           00031D   932 	C$main.c$181$3_0$170	= .
+                                    933 	.globl	C$main.c$181$3_0$170
+                                    934 ;src/main.c:181: continue;
+      00031D 18 98                  935 	jr	00106$
+      00031F                        936 00108$:
+                           00031F   937 	C$main.c$184$1_0$167	= .
+                                    938 	.globl	C$main.c$184$1_0$167
+                                    939 ;src/main.c:184: set_bkg_tiles(0, 0, 20, 18, current_page.page_data);
+      00031F 11r0Ar00               940 	ld	de, #(_current_page + 8)
+      000322 D5                     941 	push	de
+      000323 21 14 12               942 	ld	hl, #0x1214
+      000326 E5                     943 	push	hl
+      000327 AF                     944 	xor	a, a
+      000328 0F                     945 	rrca
+      000329 F5                     946 	push	af
+      00032A CDr00r00               947 	call	_set_bkg_tiles
+      00032D E8 06                  948 	add	sp, #6
+                           00032F   949 	C$main.c$185$1_0$167	= .
+                                    950 	.globl	C$main.c$185$1_0$167
+                                    951 ;src/main.c:185: }
+                           00032F   952 	C$main.c$185$1_0$167	= .
+                                    953 	.globl	C$main.c$185$1_0$167
+                           00032F   954 	XG$jump_page$0$0	= .
+                                    955 	.globl	XG$jump_page$0$0
+      00032F C9                     956 	ret
+                           000330   957 	G$update_page_bookmark$0$0	= .
+                                    958 	.globl	G$update_page_bookmark$0$0
+                           000330   959 	C$main.c$187$1_0$172	= .
+                                    960 	.globl	C$main.c$187$1_0$172
+                                    961 ;src/main.c:187: void update_page_bookmark(void){
+                                    962 ;	---------------------------------
+                                    963 ; Function update_page_bookmark
+                                    964 ; ---------------------------------
+      000330                        965 _update_page_bookmark::
+      000330 3B                     966 	dec	sp
+                           000331   967 	C$main.c$189$1_0$172	= .
+                                    968 	.globl	C$main.c$189$1_0$172
+                                    969 ;src/main.c:189: itoa(page_number, page_chars, 10);
+      000331 01r77r01               970 	ld	bc, #_page_chars+0
+      000334 59                     971 	ld	e, c
+      000335 50                     972 	ld	d, b
+      000336 21r72r01               973 	ld	hl, #_page_number
+      000339 6E                     974 	ld	l, (hl)
+                                    975 ;	spillPairReg hl
+                                    976 ;	spillPairReg hl
+      00033A FAr73r01               977 	ld	a, (_page_number + 1)
+      00033D 67                     978 	ld	h, a
+                                    979 ;	spillPairReg hl
+                                    980 ;	spillPairReg hl
+      00033E C5                     981 	push	bc
+      00033F 3E 0A                  982 	ld	a, #0x0a
+      000341 F5                     983 	push	af
+      000342 33                     984 	inc	sp
+      000343 D5                     985 	push	de
+      000344 E5                     986 	push	hl
+      000345 CDr00r00               987 	call	_itoa
+      000348 E8 05                  988 	add	sp, #5
+      00034A C1                     989 	pop	bc
+                           00034B   990 	C$main.c$190$1_0$172	= .
+                                    991 	.globl	C$main.c$190$1_0$172
+                                    992 ;src/main.c:190: if(page_number < 10){
+      00034B 21r72r01               993 	ld	hl, #_page_number
+      00034E 2A                     994 	ld	a, (hl+)
+      00034F 5F                     995 	ld	e, a
+      000350 56                     996 	ld	d, (hl)
+                           000351   997 	C$main.c$191$1_0$172	= .
+                                    998 	.globl	C$main.c$191$1_0$172
+                                    999 ;src/main.c:191: page_chars[0] = page_chars[0] - 32;
+      000351 0A                    1000 	ld	a, (bc)
+      000352 C6 E0                 1001 	add	a, #0xe0
+      000354 F8 00                 1002 	ldhl	sp,	#0
+      000356 77                    1003 	ld	(hl), a
+                           000357  1004 	C$main.c$190$1_0$172	= .
+                                   1005 	.globl	C$main.c$190$1_0$172
+                                   1006 ;src/main.c:190: if(page_number < 10){
+      000357 7B                    1007 	ld	a, e
+      000358 D6 0A                 1008 	sub	a, #0x0a
+      00035A 7A                    1009 	ld	a, d
+      00035B DE 00                 1010 	sbc	a, #0x00
+      00035D 30 2F                 1011 	jr	NC, 00105$
+                           00035F  1012 	C$main.c$191$2_0$173	= .
+                                   1013 	.globl	C$main.c$191$2_0$173
+                                   1014 ;src/main.c:191: page_chars[0] = page_chars[0] - 32;
+      00035F 7E                    1015 	ld	a, (hl)
+      000360 02                    1016 	ld	(bc), a
+                           000361  1017 	C$main.c$192$2_0$173	= .
+                                   1018 	.globl	C$main.c$192$2_0$173
+                                   1019 ;src/main.c:192: set_bkg_tile_xy(1, 19, 0x00);
+      000361 AF                    1020 	xor	a, a
+      000362 67                    1021 	ld	h, a
+      000363 2E 13                 1022 	ld	l, #0x13
+      000365 E5                    1023 	push	hl
+      000366 3E 01                 1024 	ld	a, #0x01
+      000368 F5                    1025 	push	af
+      000369 33                    1026 	inc	sp
+      00036A CDr00r00              1027 	call	_set_bkg_tile_xy
+      00036D E8 03                 1028 	add	sp, #3
+                           00036F  1029 	C$main.c$193$2_0$173	= .
+                                   1030 	.globl	C$main.c$193$2_0$173
+                                   1031 ;src/main.c:193: set_bkg_tile_xy(2, 19, 0x00);
+      00036F AF                    1032 	xor	a, a
+      000370 67                    1033 	ld	h, a
+      000371 2E 13                 1034 	ld	l, #0x13
+      000373 E5                    1035 	push	hl
+      000374 3E 02                 1036 	ld	a, #0x02
+      000376 F5                    1037 	push	af
+      000377 33                    1038 	inc	sp
+      000378 CDr00r00              1039 	call	_set_bkg_tile_xy
+      00037B E8 03                 1040 	add	sp, #3
+                           00037D  1041 	C$main.c$194$2_0$173	= .
+                                   1042 	.globl	C$main.c$194$2_0$173
+                                   1043 ;src/main.c:194: set_bkg_tile_xy(3, 19, page_chars[0]);
+      00037D 0A                    1044 	ld	a, (bc)
+      00037E 67                    1045 	ld	h, a
+      00037F 2E 13                 1046 	ld	l, #0x13
+      000381 E5                    1047 	push	hl
+      000382 3E 03                 1048 	ld	a, #0x03
+      000384 F5                    1049 	push	af
+      000385 33                    1050 	inc	sp
+      000386 CDr00r00              1051 	call	_set_bkg_tile_xy
+      000389 E8 03                 1052 	add	sp, #3
+      00038B C3r0Fr04              1053 	jp	00106$
+      00038E                       1054 00105$:
+                           00038E  1055 	C$main.c$197$1_0$172	= .
+                                   1056 	.globl	C$main.c$197$1_0$172
+                                   1057 ;src/main.c:197: page_chars[1] = page_chars[1] - 32;
+                           00038E  1058 	C$main.c$195$1_0$172	= .
+                                   1059 	.globl	C$main.c$195$1_0$172
+                                   1060 ;src/main.c:195: } else if(page_number < 100){
+      00038E 7B                    1061 	ld	a, e
+      00038F D6 64                 1062 	sub	a, #0x64
+      000391 7A                    1063 	ld	a, d
+      000392 DE 00                 1064 	sbc	a, #0x00
+      000394 30 3A                 1065 	jr	NC, 00102$
+                           000396  1066 	C$main.c$196$2_0$174	= .
+                                   1067 	.globl	C$main.c$196$2_0$174
+                                   1068 ;src/main.c:196: page_chars[0] = page_chars[0] - 32;
+      000396 F8 00                 1069 	ldhl	sp,	#0
+      000398 7E                    1070 	ld	a, (hl)
+      000399 02                    1071 	ld	(bc), a
+                           00039A  1072 	C$main.c$197$2_0$174	= .
+                                   1073 	.globl	C$main.c$197$2_0$174
+                                   1074 ;src/main.c:197: page_chars[1] = page_chars[1] - 32;
+      00039A FAr78r01              1075 	ld	a, (#(_page_chars + 1) + 0)
+      00039D C6 E0                 1076 	add	a, #0xe0
+      00039F EAr78r01              1077 	ld	(#(_page_chars + 1)),a
+                           0003A2  1078 	C$main.c$198$2_0$174	= .
+                                   1079 	.globl	C$main.c$198$2_0$174
+                                   1080 ;src/main.c:198: set_bkg_tile_xy(1, 19, 0x00);
+      0003A2 AF                    1081 	xor	a, a
+      0003A3 67                    1082 	ld	h, a
+      0003A4 2E 13                 1083 	ld	l, #0x13
+      0003A6 E5                    1084 	push	hl
+      0003A7 3E 01                 1085 	ld	a, #0x01
+      0003A9 F5                    1086 	push	af
+      0003AA 33                    1087 	inc	sp
+      0003AB CDr00r00              1088 	call	_set_bkg_tile_xy
+      0003AE E8 03                 1089 	add	sp, #3
+                           0003B0  1090 	C$main.c$199$2_0$174	= .
+                                   1091 	.globl	C$main.c$199$2_0$174
+                                   1092 ;src/main.c:199: set_bkg_tile_xy(2, 19, page_chars[0]);
+      0003B0 0A                    1093 	ld	a, (bc)
+      0003B1 67                    1094 	ld	h, a
+      0003B2 2E 13                 1095 	ld	l, #0x13
+      0003B4 E5                    1096 	push	hl
+      0003B5 3E 02                 1097 	ld	a, #0x02
+      0003B7 F5                    1098 	push	af
+      0003B8 33                    1099 	inc	sp
+      0003B9 CDr00r00              1100 	call	_set_bkg_tile_xy
+      0003BC E8 03                 1101 	add	sp, #3
+                           0003BE  1102 	C$main.c$200$2_0$174	= .
+                                   1103 	.globl	C$main.c$200$2_0$174
+                                   1104 ;src/main.c:200: set_bkg_tile_xy(3, 19, page_chars[1]);
+      0003BE FAr78r01              1105 	ld	a, (#(_page_chars + 1) + 0)
+      0003C1 67                    1106 	ld	h, a
+      0003C2 2E 13                 1107 	ld	l, #0x13
+      0003C4 E5                    1108 	push	hl
+      0003C5 3E 03                 1109 	ld	a, #0x03
+      0003C7 F5                    1110 	push	af
+      0003C8 33                    1111 	inc	sp
+      0003C9 CDr00r00              1112 	call	_set_bkg_tile_xy
+      0003CC E8 03                 1113 	add	sp, #3
+      0003CE 18 3F                 1114 	jr	00106$
+      0003D0                       1115 00102$:
+                           0003D0  1116 	C$main.c$202$2_0$175	= .
+                                   1117 	.globl	C$main.c$202$2_0$175
+                                   1118 ;src/main.c:202: page_chars[0] = page_chars[0] - 32;
+      0003D0 F8 00                 1119 	ldhl	sp,	#0
+      0003D2 7E                    1120 	ld	a, (hl)
+      0003D3 02                    1121 	ld	(bc), a
+                           0003D4  1122 	C$main.c$203$2_0$175	= .
+                                   1123 	.globl	C$main.c$203$2_0$175
+                                   1124 ;src/main.c:203: page_chars[1] = page_chars[1] - 32;
+      0003D4 FAr78r01              1125 	ld	a, (#(_page_chars + 1) + 0)
+      0003D7 C6 E0                 1126 	add	a, #0xe0
+      0003D9 EAr78r01              1127 	ld	(#(_page_chars + 1)),a
+                           0003DC  1128 	C$main.c$204$2_0$175	= .
+                                   1129 	.globl	C$main.c$204$2_0$175
+                                   1130 ;src/main.c:204: page_chars[2] = page_chars[2] - 32;
+      0003DC 03                    1131 	inc	bc
+      0003DD 03                    1132 	inc	bc
+      0003DE 0A                    1133 	ld	a, (bc)
+      0003DF C6 E0                 1134 	add	a, #0xe0
+      0003E1 02                    1135 	ld	(bc), a
+                           0003E2  1136 	C$main.c$205$2_0$175	= .
+                                   1137 	.globl	C$main.c$205$2_0$175
+                                   1138 ;src/main.c:205: set_bkg_tile_xy(1, 19, page_chars[0]);
+      0003E2 F8 00                 1139 	ldhl	sp,	#0
+      0003E4 66                    1140 	ld	h, (hl)
+      0003E5 2E 13                 1141 	ld	l, #0x13
+      0003E7 E5                    1142 	push	hl
+      0003E8 3E 01                 1143 	ld	a, #0x01
+      0003EA F5                    1144 	push	af
+      0003EB 33                    1145 	inc	sp
+      0003EC CDr00r00              1146 	call	_set_bkg_tile_xy
+      0003EF E8 03                 1147 	add	sp, #3
+                           0003F1  1148 	C$main.c$206$2_0$175	= .
+                                   1149 	.globl	C$main.c$206$2_0$175
+                                   1150 ;src/main.c:206: set_bkg_tile_xy(2, 19, page_chars[1]);
+      0003F1 FAr78r01              1151 	ld	a, (#(_page_chars + 1) + 0)
+      0003F4 67                    1152 	ld	h, a
+      0003F5 2E 13                 1153 	ld	l, #0x13
+      0003F7 E5                    1154 	push	hl
+      0003F8 3E 02                 1155 	ld	a, #0x02
+      0003FA F5                    1156 	push	af
+      0003FB 33                    1157 	inc	sp
+      0003FC CDr00r00              1158 	call	_set_bkg_tile_xy
+      0003FF E8 03                 1159 	add	sp, #3
+                           000401  1160 	C$main.c$207$2_0$175	= .
+                                   1161 	.globl	C$main.c$207$2_0$175
+                                   1162 ;src/main.c:207: set_bkg_tile_xy(3, 19, page_chars[2]);
+      000401 0A                    1163 	ld	a, (bc)
+      000402 67                    1164 	ld	h, a
+      000403 2E 13                 1165 	ld	l, #0x13
+      000405 E5                    1166 	push	hl
+      000406 3E 03                 1167 	ld	a, #0x03
+      000408 F5                    1168 	push	af
+      000409 33                    1169 	inc	sp
+      00040A CDr00r00              1170 	call	_set_bkg_tile_xy
+      00040D E8 03                 1171 	add	sp, #3
+      00040F                       1172 00106$:
+                           00040F  1173 	C$main.c$210$1_0$172	= .
+                                   1174 	.globl	C$main.c$210$1_0$172
+                                   1175 ;src/main.c:210: mapped_bookmark = map((int16_t)(page_number));
+      00040F 21r72r01              1176 	ld	hl, #_page_number
+      000412 2A                    1177 	ld	a, (hl+)
+      000413 4F                    1178 	ld	c, a
+      000414 46                    1179 	ld	b, (hl)
+      000415 C5                    1180 	push	bc
+      000416 CDr00r00              1181 	call	_map
+      000419 E1                    1182 	pop	hl
+      00041A 21r88r01              1183 	ld	hl, #_mapped_bookmark
+      00041D 73                    1184 	ld	(hl), e
+                           00041E  1185 	C$main.c$211$1_0$172	= .
+                                   1186 	.globl	C$main.c$211$1_0$172
+                                   1187 ;src/main.c:211: }
+      00041E 33                    1188 	inc	sp
+                           00041F  1189 	C$main.c$211$1_0$172	= .
+                                   1190 	.globl	C$main.c$211$1_0$172
+                           00041F  1191 	XG$update_page_bookmark$0$0	= .
+                                   1192 	.globl	XG$update_page_bookmark$0$0
+      00041F C9                    1193 	ret
+                           000420  1194 	G$choose_page$0$0	= .
+                                   1195 	.globl	G$choose_page$0$0
+                           000420  1196 	C$main.c$213$1_0$177	= .
+                                   1197 	.globl	C$main.c$213$1_0$177
+                                   1198 ;src/main.c:213: void choose_page(void){
+                                   1199 ;	---------------------------------
+                                   1200 ; Function choose_page
+                                   1201 ; ---------------------------------
+      000420                       1202 _choose_page::
+                           000420  1203 	C$main.c$214$1_0$177	= .
+                                   1204 	.globl	C$main.c$214$1_0$177
+                                   1205 ;src/main.c:214: if(h_right){
+      000420 21r7Dr01              1206 	ld	hl, #_h_right
+      000423 CB 46                 1207 	bit	0, (hl)
+      000425 28 4E                 1208 	jr	Z, 00108$
+                           000427  1209 	C$main.c$215$2_0$178	= .
+                                   1210 	.globl	C$main.c$215$2_0$178
+                                   1211 ;src/main.c:215: if(r_button_down){
+      000427 21r81r01              1212 	ld	hl, #_r_button_down
+      00042A CB 46                 1213 	bit	0, (hl)
+      00042C 28 0A                 1214 	jr	Z, 00102$
+                           00042E  1215 	C$main.c$216$3_0$179	= .
+                                   1216 	.globl	C$main.c$216$3_0$179
+                                   1217 ;src/main.c:216: p_turner_cd = 20;
+      00042E 21r7Br01              1218 	ld	hl, #_p_turner_cd
+      000431 36 14                 1219 	ld	(hl), #0x14
+                           000433  1220 	C$main.c$217$3_0$179	= .
+                                   1221 	.globl	C$main.c$217$3_0$179
+                                   1222 ;src/main.c:217: p_turner_i = 20;
+      000433 21r7Cr01              1223 	ld	hl, #_p_turner_i
+      000436 36 14                 1224 	ld	(hl), #0x14
+      000438                       1225 00102$:
+                           000438  1226 	C$main.c$219$2_0$178	= .
+                                   1227 	.globl	C$main.c$219$2_0$178
+                                   1228 ;src/main.c:219: if(p_turner_cd == p_turner_i){
+      000438 FAr7Br01              1229 	ld	a, (#_p_turner_cd)
+      00043B 21r7Cr01              1230 	ld	hl, #_p_turner_i
+      00043E 96                    1231 	sub	a, (hl)
+      00043F 20 30                 1232 	jr	NZ, 00106$
+                           000441  1233 	C$main.c$220$3_0$180	= .
+                                   1234 	.globl	C$main.c$220$3_0$180
+                                   1235 ;src/main.c:220: p_turner_i = 0;
+      000441 21r7Cr01              1236 	ld	hl, #_p_turner_i
+      000444 36 00                 1237 	ld	(hl), #0x00
+                           000446  1238 	C$main.c$221$3_0$180	= .
+                                   1239 	.globl	C$main.c$221$3_0$180
+                                   1240 ;src/main.c:221: p_turner_cd--;
+      000446 21r7Br01              1241 	ld	hl, #_p_turner_cd
+                           000449  1242 	C$main.c$222$3_0$180	= .
+                                   1243 	.globl	C$main.c$222$3_0$180
+                                   1244 ;src/main.c:222: if(!p_turner_cd) p_turner_cd = 1;
+      000449 35                    1245 	dec	(hl)
+      00044A 20 02                 1246 	jr	NZ, 00104$
+      00044C 36 01                 1247 	ld	(hl), #0x01
+      00044E                       1248 00104$:
+                           00044E  1249 	C$main.c$223$3_0$180	= .
+                                   1250 	.globl	C$main.c$223$3_0$180
+                                   1251 ;src/main.c:223: page_number = page_number == (uint16_t)(948) ? 1 : page_number + 1;
+      00044E 21r72r01              1252 	ld	hl, #_page_number
+      000451 7E                    1253 	ld	a, (hl)
+      000452 D6 B4                 1254 	sub	a, #0xb4
+      000454 20 0B                 1255 	jr	NZ, 00119$
+      000456 23                    1256 	inc	hl
+      000457 7E                    1257 	ld	a, (hl)
+      000458 D6 03                 1258 	sub	a, #0x03
+      00045A 20 05                 1259 	jr	NZ, 00119$
+      00045C 01 01 00              1260 	ld	bc, #0x0001
+      00045F 18 07                 1261 	jr	00120$
+      000461                       1262 00119$:
+      000461 21r72r01              1263 	ld	hl, #_page_number
+      000464 2A                    1264 	ld	a, (hl+)
+      000465 4F                    1265 	ld	c, a
+      000466 46                    1266 	ld	b, (hl)
+      000467 03                    1267 	inc	bc
+      000468                       1268 00120$:
+      000468 21r72r01              1269 	ld	hl, #_page_number
+      00046B 79                    1270 	ld	a, c
+      00046C 22                    1271 	ld	(hl+), a
+      00046D 70                    1272 	ld	(hl), b
+                           00046E  1273 	C$main.c$224$3_0$180	= .
+                                   1274 	.globl	C$main.c$224$3_0$180
+                                   1275 ;src/main.c:224: update_page_bookmark();
+      00046E CDr30r03              1276 	call	_update_page_bookmark
+      000471                       1277 00106$:
+                           000471  1278 	C$main.c$226$2_0$178	= .
+                                   1279 	.globl	C$main.c$226$2_0$178
+                                   1280 ;src/main.c:226: p_turner_i++;
+      000471 21r7Cr01              1281 	ld	hl, #_p_turner_i
+      000474 34                    1282 	inc	(hl)
+      000475                       1283 00108$:
+                           000475  1284 	C$main.c$228$1_0$177	= .
+                                   1285 	.globl	C$main.c$228$1_0$177
+                                   1286 ;src/main.c:228: if(h_left){
+      000475 21r7Er01              1287 	ld	hl, #_h_left
+      000478 CB 46                 1288 	bit	0, (hl)
+      00047A C8                    1289 	ret	Z
+                           00047B  1290 	C$main.c$229$2_0$181	= .
+                                   1291 	.globl	C$main.c$229$2_0$181
+                                   1292 ;src/main.c:229: if(l_button_down){
+      00047B 21r82r01              1293 	ld	hl, #_l_button_down
+      00047E CB 46                 1294 	bit	0, (hl)
+      000480 28 0A                 1295 	jr	Z, 00110$
+                           000482  1296 	C$main.c$230$3_0$182	= .
+                                   1297 	.globl	C$main.c$230$3_0$182
+                                   1298 ;src/main.c:230: p_turner_cd = 20;
+      000482 21r7Br01              1299 	ld	hl, #_p_turner_cd
+      000485 36 14                 1300 	ld	(hl), #0x14
+                           000487  1301 	C$main.c$231$3_0$182	= .
+                                   1302 	.globl	C$main.c$231$3_0$182
+                                   1303 ;src/main.c:231: p_turner_i = 20;
+      000487 21r7Cr01              1304 	ld	hl, #_p_turner_i
+      00048A 36 14                 1305 	ld	(hl), #0x14
+      00048C                       1306 00110$:
+                           00048C  1307 	C$main.c$233$2_0$181	= .
+                                   1308 	.globl	C$main.c$233$2_0$181
+                                   1309 ;src/main.c:233: if(p_turner_cd == p_turner_i){
+      00048C FAr7Br01              1310 	ld	a, (#_p_turner_cd)
+      00048F 21r7Cr01              1311 	ld	hl, #_p_turner_i
+      000492 96                    1312 	sub	a, (hl)
+      000493 20 27                 1313 	jr	NZ, 00114$
+                           000495  1314 	C$main.c$234$3_0$183	= .
+                                   1315 	.globl	C$main.c$234$3_0$183
+                                   1316 ;src/main.c:234: p_turner_i = 0;
+      000495 21r7Cr01              1317 	ld	hl, #_p_turner_i
+      000498 36 00                 1318 	ld	(hl), #0x00
+                           00049A  1319 	C$main.c$235$3_0$183	= .
+                                   1320 	.globl	C$main.c$235$3_0$183
+                                   1321 ;src/main.c:235: p_turner_cd--;
+      00049A 21r7Br01              1322 	ld	hl, #_p_turner_cd
+                           00049D  1323 	C$main.c$236$3_0$183	= .
+                                   1324 	.globl	C$main.c$236$3_0$183
+                                   1325 ;src/main.c:236: if(!p_turner_cd) p_turner_cd = 1;
+      00049D 35                    1326 	dec	(hl)
+      00049E 20 02                 1327 	jr	NZ, 00112$
+      0004A0 36 01                 1328 	ld	(hl), #0x01
+      0004A2                       1329 00112$:
+                           0004A2  1330 	C$main.c$237$3_0$183	= .
+                                   1331 	.globl	C$main.c$237$3_0$183
+                                   1332 ;src/main.c:237: page_number = page_number == 1 ? (uint16_t)(948) : page_number - 1;
+      0004A2 21r72r01              1333 	ld	hl, #_page_number
+      0004A5 2A                    1334 	ld	a, (hl+)
+      0004A6 4F                    1335 	ld	c, a
+      0004A7 46                    1336 	ld	b, (hl)
+      0004A8 79                    1337 	ld	a, c
+      0004A9 3D                    1338 	dec	a
+      0004AA B0                    1339 	or	a, b
+      0004AB 20 05                 1340 	jr	NZ, 00121$
+      0004AD 01 B4 03              1341 	ld	bc, #0x03b4
+      0004B0 18 01                 1342 	jr	00122$
+      0004B2                       1343 00121$:
+      0004B2 0B                    1344 	dec	bc
+      0004B3                       1345 00122$:
+      0004B3 21r72r01              1346 	ld	hl, #_page_number
+      0004B6 79                    1347 	ld	a, c
+      0004B7 22                    1348 	ld	(hl+), a
+      0004B8 70                    1349 	ld	(hl), b
+                           0004B9  1350 	C$main.c$238$3_0$183	= .
+                                   1351 	.globl	C$main.c$238$3_0$183
+                                   1352 ;src/main.c:238: update_page_bookmark();
+      0004B9 CDr30r03              1353 	call	_update_page_bookmark
+      0004BC                       1354 00114$:
+                           0004BC  1355 	C$main.c$240$2_0$181	= .
+                                   1356 	.globl	C$main.c$240$2_0$181
+                                   1357 ;src/main.c:240: p_turner_i++;
+      0004BC 21r7Cr01              1358 	ld	hl, #_p_turner_i
+      0004BF 34                    1359 	inc	(hl)
+                           0004C0  1360 	C$main.c$242$1_0$177	= .
+                                   1361 	.globl	C$main.c$242$1_0$177
+                                   1362 ;src/main.c:242: }
+                           0004C0  1363 	C$main.c$242$1_0$177	= .
+                                   1364 	.globl	C$main.c$242$1_0$177
+                           0004C0  1365 	XG$choose_page$0$0	= .
+                                   1366 	.globl	XG$choose_page$0$0
+      0004C0 C9                    1367 	ret
+                           0004C1  1368 	G$interrupt_LCD$0$0	= .
+                                   1369 	.globl	G$interrupt_LCD$0$0
+                           0004C1  1370 	C$main.c$244$1_0$185	= .
+                                   1371 	.globl	C$main.c$244$1_0$185
+                                   1372 ;src/main.c:244: void interrupt_LCD(void){
+                                   1373 ;	---------------------------------
+                                   1374 ; Function interrupt_LCD
+                                   1375 ; ---------------------------------
+      0004C1                       1376 _interrupt_LCD::
+                           0004C1  1377 	C$main.c$245$1_0$185	= .
+                                   1378 	.globl	C$main.c$245$1_0$185
+                                   1379 ;src/main.c:245: if(LYC_REG == 0x00){
+      0004C1 FAr00r00              1380 	ld	a, (#_LYC_REG)
+                           0004C4  1381 	C$main.c$246$2_0$186	= .
+                                   1382 	.globl	C$main.c$246$2_0$186
+                                   1383 ;src/main.c:246: SCX_REG = 0x00;
+      0004C4 B7                    1384 	or	a,a
+      0004C5 20 0C                 1385 	jr	NZ, 00104$
+      0004C7 E0r00                 1386 	ldh	(_SCX_REG + 0), a
+                           0004C9  1387 	C$main.c$247$2_0$186	= .
+                                   1388 	.globl	C$main.c$247$2_0$186
+                                   1389 ;src/main.c:247: LYC_REG = (144 - end_p_height);
+      0004C9 21r87r01              1390 	ld	hl, #_end_p_height
+      0004CC 4E                    1391 	ld	c, (hl)
+      0004CD 3E 90                 1392 	ld	a, #0x90
+      0004CF 91                    1393 	sub	a, c
+      0004D0 E0r00                 1394 	ldh	(_LYC_REG + 0), a
+      0004D2 C9                    1395 	ret
+      0004D3                       1396 00104$:
+                           0004D3  1397 	C$main.c$249$1_0$185	= .
+                                   1398 	.globl	C$main.c$249$1_0$185
+                                   1399 ;src/main.c:249: else if(LYC_REG == (144 - end_p_height)){
+      0004D3 21r87r01              1400 	ld	hl, #_end_p_height
+      0004D6 4E                    1401 	ld	c, (hl)
+      0004D7 06 00                 1402 	ld	b, #0x00
+      0004D9 3E 90                 1403 	ld	a, #0x90
+      0004DB 91                    1404 	sub	a, c
+      0004DC 4F                    1405 	ld	c, a
+      0004DD 9F                    1406 	sbc	a, a
+      0004DE 90                    1407 	sub	a, b
+      0004DF 47                    1408 	ld	b, a
+      0004E0 F0r00                 1409 	ldh	a, (_LYC_REG + 0)
+      0004E2 5F                    1410 	ld	e, a
+      0004E3 16 00                 1411 	ld	d, #0x00
+      0004E5 7B                    1412 	ld	a, e
+      0004E6 91                    1413 	sub	a, c
+      0004E7 C0                    1414 	ret	NZ
+      0004E8 7A                    1415 	ld	a, d
+      0004E9 90                    1416 	sub	a, b
+      0004EA C0                    1417 	ret	NZ
+                           0004EB  1418 	C$main.c$250$2_0$187	= .
+                                   1419 	.globl	C$main.c$250$2_0$187
+                                   1420 ;src/main.c:250: SCX_REG = mapped_bookmark;
+      0004EB FAr88r01              1421 	ld	a, (#_mapped_bookmark)
+      0004EE E0r00                 1422 	ldh	(_SCX_REG + 0), a
+                           0004F0  1423 	C$main.c$251$2_0$187	= .
+                                   1424 	.globl	C$main.c$251$2_0$187
+                                   1425 ;src/main.c:251: LYC_REG = 0x00;
+      0004F0 AF                    1426 	xor	a, a
+      0004F1 E0r00                 1427 	ldh	(_LYC_REG + 0), a
+                           0004F3  1428 	C$main.c$254$1_0$185	= .
+                                   1429 	.globl	C$main.c$254$1_0$185
+                                   1430 ;src/main.c:254: }
+                           0004F3  1431 	C$main.c$254$1_0$185	= .
+                                   1432 	.globl	C$main.c$254$1_0$185
+                           0004F3  1433 	XG$interrupt_LCD$0$0	= .
+                                   1434 	.globl	XG$interrupt_LCD$0$0
+      0004F3 C9                    1435 	ret
+                           0004F4  1436 	G$main$0$0	= .
+                                   1437 	.globl	G$main$0$0
+                           0004F4  1438 	C$main.c$256$1_0$189	= .
+                                   1439 	.globl	C$main.c$256$1_0$189
+                                   1440 ;src/main.c:256: void main(void)
+                                   1441 ;	---------------------------------
+                                   1442 ; Function main
+                                   1443 ; ---------------------------------
+      0004F4                       1444 _main::
+                           0004F4  1445 	C$main.c$262$1_0$189	= .
+                                   1446 	.globl	C$main.c$262$1_0$189
+                                   1447 ;src/main.c:262: }
+      0004F4 F3                    1448 	di
+                           0004F5  1449 	C$main.c$259$2_0$190	= .
+                                   1450 	.globl	C$main.c$259$2_0$190
+                                   1451 ;src/main.c:259: STAT_REG = 0x45;
+      0004F5 3E 45                 1452 	ld	a, #0x45
+      0004F7 E0r00                 1453 	ldh	(_STAT_REG + 0), a
+                           0004F9  1454 	C$main.c$260$2_0$190	= .
+                                   1455 	.globl	C$main.c$260$2_0$190
+                                   1456 ;src/main.c:260: LYC_REG = 0x00;
+      0004F9 AF                    1457 	xor	a, a
+      0004FA E0r00                 1458 	ldh	(_LYC_REG + 0), a
+                           0004FC  1459 	C$main.c$261$2_0$190	= .
+                                   1460 	.globl	C$main.c$261$2_0$190
+                                   1461 ;src/main.c:261: add_LCD(interrupt_LCD);
+      0004FC 11rC1r04              1462 	ld	de, #_interrupt_LCD
+      0004FF D5                    1463 	push	de
+      000500 CDr00r00              1464 	call	_add_LCD
+      000503 E1                    1465 	pop	hl
+      000504 FB                    1466 	ei
+                           000505  1467 	C$main.c$263$1_0$189	= .
+                                   1468 	.globl	C$main.c$263$1_0$189
+                                   1469 ;src/main.c:263: set_interrupts(VBL_IFLAG | LCD_IFLAG);
+      000505 3E 03                 1470 	ld	a, #0x03
+      000507 F5                    1471 	push	af
+      000508 33                    1472 	inc	sp
+      000509 CDr00r00              1473 	call	_set_interrupts
+      00050C 33                    1474 	inc	sp
+                           00050D  1475 	C$main.c$265$1_0$189	= .
+                                   1476 	.globl	C$main.c$265$1_0$189
+                                   1477 ;src/main.c:265: font_init();
+      00050D CDr00r00              1478 	call	_font_init
+                           000510  1479 	C$main.c$266$1_0$189	= .
+                                   1480 	.globl	C$main.c$266$1_0$189
+                                   1481 ;src/main.c:266: book_font = font_load(font_spect);
+      000510 11r00r00              1482 	ld	de, #_font_spect
+      000513 D5                    1483 	push	de
+      000514 CDr00r00              1484 	call	_font_load
+      000517 E1                    1485 	pop	hl
+      000518 21r00r00              1486 	ld	hl, #_book_font
+      00051B 7B                    1487 	ld	a, e
+      00051C 22                    1488 	ld	(hl+), a
+                           00051D  1489 	C$main.c$267$1_0$189	= .
+                                   1490 	.globl	C$main.c$267$1_0$189
+                                   1491 ;src/main.c:267: font_set(book_font);
+      00051D 7A                    1492 	ld	a, d
+      00051E 32                    1493 	ld	(hl-), a
+      00051F 2A                    1494 	ld	a, (hl+)
+      000520 5F                    1495 	ld	e, a
+      000521 56                    1496 	ld	d, (hl)
+      000522 D5                    1497 	push	de
+      000523 CDr00r00              1498 	call	_font_set
+      000526 E1                    1499 	pop	hl
+                           000527  1500 	C$main.c$269$1_0$189	= .
+                                   1501 	.globl	C$main.c$269$1_0$189
+                                   1502 ;src/main.c:269: SHOW_BKG;
+      000527 F0r00                 1503 	ldh	a, (_LCDC_REG + 0)
+      000529 F6 01                 1504 	or	a, #0x01
+      00052B E0r00                 1505 	ldh	(_LCDC_REG + 0), a
+                           00052D  1506 	C$main.c$270$1_0$189	= .
+                                   1507 	.globl	C$main.c$270$1_0$189
+                                   1508 ;src/main.c:270: h_right = false;
+      00052D 21r7Dr01              1509 	ld	hl, #_h_right
+      000530 36 00                 1510 	ld	(hl), #0x00
+                           000532  1511 	C$main.c$271$1_0$189	= .
+                                   1512 	.globl	C$main.c$271$1_0$189
+                                   1513 ;src/main.c:271: h_left = false;
+      000532 21r7Er01              1514 	ld	hl, #_h_left
+      000535 36 00                 1515 	ld	(hl), #0x00
+                           000537  1516 	C$main.c$273$1_0$189	= .
+                                   1517 	.globl	C$main.c$273$1_0$189
+                                   1518 ;src/main.c:273: frame = 0;
+      000537 21r86r01              1519 	ld	hl, #_frame
+      00053A 36 00                 1520 	ld	(hl), #0x00
+                           00053C  1521 	C$main.c$274$1_0$189	= .
+                                   1522 	.globl	C$main.c$274$1_0$189
+                                   1523 ;src/main.c:274: SWITCH_ROM( BANK(gatsby_1) );
+      00053C 3Er00                 1524 	ld	a, #<(___bank_gatsby_1)
+      00053E E0r00                 1525 	ldh	(__current_bank + 0), a
+      000540 3Er00                 1526 	ld	a, #<(___bank_gatsby_1)
+      000542 EA 00 20              1527 	ld	(#0x2000),a
+                           000545  1528 	C$main.c$275$1_0$189	= .
+                                   1529 	.globl	C$main.c$275$1_0$189
+                                   1530 ;src/main.c:275: printf("Hello world");
+      000545 11r60r06              1531 	ld	de, #___str_0
+      000548 D5                    1532 	push	de
+      000549 CDr00r00              1533 	call	_printf
+      00054C E1                    1534 	pop	hl
+                           00054D  1535 	C$main.c$276$1_0$189	= .
+                                   1536 	.globl	C$main.c$276$1_0$189
+                                   1537 ;src/main.c:276: current_page = page_1;
+      00054D 11 70 01              1538 	ld	de, #0x0170
+      000550 D5                    1539 	push	de
+      000551 11r00r00              1540 	ld	de, #_page_1
+      000554 D5                    1541 	push	de
+      000555 11r02r00              1542 	ld	de, #_current_page
+      000558 D5                    1543 	push	de
+      000559 CDr00r00              1544 	call	___memcpy
+      00055C E8 06                 1545 	add	sp, #6
+                           00055E  1546 	C$main.c$277$1_0$189	= .
+                                   1547 	.globl	C$main.c$277$1_0$189
+                                   1548 ;src/main.c:277: page_number = 1;
+      00055E 21r72r01              1549 	ld	hl, #_page_number
+      000561 3E 01                 1550 	ld	a, #0x01
+      000563 22                    1551 	ld	(hl+), a
+      000564 AF                    1552 	xor	a, a
+      000565 77                    1553 	ld	(hl), a
+                           000566  1554 	C$main.c$278$1_0$189	= .
+                                   1555 	.globl	C$main.c$278$1_0$189
+                                   1556 ;src/main.c:278: set_bkg_data(102, 10, Bookmark_tiles);
+      000566 11r00r00              1557 	ld	de, #_Bookmark_tiles
+      000569 D5                    1558 	push	de
+      00056A 21 66 0A              1559 	ld	hl, #0xa66
+      00056D E5                    1560 	push	hl
+      00056E CDr00r00              1561 	call	_set_bkg_data
+      000571 E8 04                 1562 	add	sp, #4
+                           000573  1563 	C$main.c$279$1_0$189	= .
+                                   1564 	.globl	C$main.c$279$1_0$189
+                                   1565 ;src/main.c:279: set_bkg_tiles(0, 18, 32, 3, bookmark);
+      000573 11r00r00              1566 	ld	de, #_bookmark
+      000576 D5                    1567 	push	de
+      000577 21 20 03              1568 	ld	hl, #0x320
+      00057A E5                    1569 	push	hl
+      00057B 21 00 12              1570 	ld	hl, #0x1200
+      00057E E5                    1571 	push	hl
+      00057F CDr00r00              1572 	call	_set_bkg_tiles
+      000582 E8 06                 1573 	add	sp, #6
+                           000584  1574 	C$main.c$280$1_0$189	= .
+                                   1575 	.globl	C$main.c$280$1_0$189
+                                   1576 ;src/main.c:280: set_bkg_tiles(0, 0, 20, 18, current_page.page_data);
+      000584 11r0Ar00              1577 	ld	de, #(_current_page + 8)
+      000587 D5                    1578 	push	de
+      000588 21 14 12              1579 	ld	hl, #0x1214
+      00058B E5                    1580 	push	hl
+      00058C AF                    1581 	xor	a, a
+      00058D 0F                    1582 	rrca
+      00058E F5                    1583 	push	af
+      00058F CDr00r00              1584 	call	_set_bkg_tiles
+      000592 E8 06                 1585 	add	sp, #6
+                           000594  1586 	C$main.c$282$1_0$189	= .
+                                   1587 	.globl	C$main.c$282$1_0$189
+                                   1588 ;src/main.c:282: while(1) {
+      000594                       1589 00119$:
+                           000594  1590 	C$main.c$284$2_0$191	= .
+                                   1591 	.globl	C$main.c$284$2_0$191
+                                   1592 ;src/main.c:284: update_joy();
+      000594 CDr5Er00              1593 	call	_update_joy
+                           000597  1594 	C$main.c$286$2_0$191	= .
+                                   1595 	.globl	C$main.c$286$2_0$191
+                                   1596 ;src/main.c:286: if(a_button_down){
+      000597 21r83r01              1597 	ld	hl, #_a_button_down
+      00059A CB 46                 1598 	bit	0, (hl)
+      00059C 28 59                 1599 	jr	Z, 00107$
+                           00059E  1600 	C$main.c$287$3_0$192	= .
+                                   1601 	.globl	C$main.c$287$3_0$192
+                                   1602 ;src/main.c:287: page_select = !page_select;
+      00059E 21r76r01              1603 	ld	hl, #_page_select
+      0005A1 7E                    1604 	ld	a, (hl)
+      0005A2 EE 01                 1605 	xor	a, #0x01
+      0005A4 77                    1606 	ld	(hl), a
+                           0005A5  1607 	C$main.c$288$3_0$192	= .
+                                   1608 	.globl	C$main.c$288$3_0$192
+                                   1609 ;src/main.c:288: if(page_select){
+      0005A5 CB 46                 1610 	bit	0, (hl)
+      0005A7 28 2C                 1611 	jr	Z, 00104$
+                           0005A9  1612 	C$main.c$289$4_0$193	= .
+                                   1613 	.globl	C$main.c$289$4_0$193
+                                   1614 ;src/main.c:289: page_number_temp = page_number;
+      0005A9 FAr72r01              1615 	ld	a, (#_page_number)
+      0005AC EAr74r01              1616 	ld	(#_page_number_temp),a
+      0005AF FAr73r01              1617 	ld	a, (#_page_number + 1)
+      0005B2 EAr75r01              1618 	ld	(#_page_number_temp + 1),a
+                           0005B5  1619 	C$main.c$290$4_0$193	= .
+                                   1620 	.globl	C$main.c$290$4_0$193
+                                   1621 ;src/main.c:290: update_page_bookmark();
+      0005B5 CDr30r03              1622 	call	_update_page_bookmark
+                           0005B8  1623 	C$main.c$291$5_0$194	= .
+                                   1624 	.globl	C$main.c$291$5_0$194
+                                   1625 ;src/main.c:291: for(end_p_height=0; end_p_height<20; end_p_height++){
+      0005B8 21r87r01              1626 	ld	hl, #_end_p_height
+      0005BB 36 00                 1627 	ld	(hl), #0x00
+      0005BD                       1628 00124$:
+                                   1629 ;src/main.c:292: move_bkg(0, end_p_height);
+      0005BD 21r87r01              1630 	ld	hl, #_end_p_height
+      0005C0 4E                    1631 	ld	c, (hl)
+                                   1632 ;C:/gbdk/include/gb/gb.h:1080: SCX_REG=x, SCY_REG=y;
+      0005C1 AF                    1633 	xor	a, a
+      0005C2 E0r00                 1634 	ldh	(_SCX_REG + 0), a
+      0005C4 79                    1635 	ld	a, c
+      0005C5 E0r00                 1636 	ldh	(_SCY_REG + 0), a
+                           0005C7  1637 	C$main.c$293$6_0$195	= .
+                                   1638 	.globl	C$main.c$293$6_0$195
+                                   1639 ;src/main.c:293: wait_vbl_done();
+      0005C7 CDr00r00              1640 	call	_wait_vbl_done
+                           0005CA  1641 	C$main.c$291$5_0$194	= .
+                                   1642 	.globl	C$main.c$291$5_0$194
+                                   1643 ;src/main.c:291: for(end_p_height=0; end_p_height<20; end_p_height++){
+      0005CA 21r87r01              1644 	ld	hl, #_end_p_height
+      0005CD 34                    1645 	inc	(hl)
+      0005CE 7E                    1646 	ld	a, (hl)
+      0005CF D6 14                 1647 	sub	a, #0x14
+      0005D1 38 EA                 1648 	jr	C, 00124$
+      0005D3 18 22                 1649 	jr	00107$
+      0005D5                       1650 00104$:
+                           0005D5  1651 	C$main.c$297$4_0$196	= .
+                                   1652 	.globl	C$main.c$297$4_0$196
+                                   1653 ;src/main.c:297: jump_page();
+      0005D5 CDrA1r02              1654 	call	_jump_page
+                           0005D8  1655 	C$main.c$299$5_0$197	= .
+                                   1656 	.globl	C$main.c$299$5_0$197
+                                   1657 ;src/main.c:299: for(end_p_height=20; end_p_height!=255; end_p_height--){
+      0005D8 21r87r01              1658 	ld	hl, #_end_p_height
+      0005DB 36 14                 1659 	ld	(hl), #0x14
+      0005DD                       1660 00126$:
+                                   1661 ;src/main.c:300: move_bkg(0, end_p_height);
+      0005DD 21r87r01              1662 	ld	hl, #_end_p_height
+      0005E0 4E                    1663 	ld	c, (hl)
+                                   1664 ;C:/gbdk/include/gb/gb.h:1080: SCX_REG=x, SCY_REG=y;
+      0005E1 AF                    1665 	xor	a, a
+      0005E2 E0r00                 1666 	ldh	(_SCX_REG + 0), a
+      0005E4 79                    1667 	ld	a, c
+      0005E5 E0r00                 1668 	ldh	(_SCY_REG + 0), a
+                           0005E7  1669 	C$main.c$301$6_0$198	= .
+                                   1670 	.globl	C$main.c$301$6_0$198
+                                   1671 ;src/main.c:301: wait_vbl_done();
+      0005E7 CDr00r00              1672 	call	_wait_vbl_done
+                           0005EA  1673 	C$main.c$299$5_0$197	= .
+                                   1674 	.globl	C$main.c$299$5_0$197
+                                   1675 ;src/main.c:299: for(end_p_height=20; end_p_height!=255; end_p_height--){
+      0005EA 21r87r01              1676 	ld	hl, #_end_p_height
+      0005ED 35                    1677 	dec	(hl)
+      0005EE 7E                    1678 	ld	a, (hl)
+      0005EF 3C                    1679 	inc	a
+      0005F0 20 EB                 1680 	jr	NZ, 00126$
+                           0005F2  1681 	C$main.c$303$4_0$196	= .
+                                   1682 	.globl	C$main.c$303$4_0$196
+                                   1683 ;src/main.c:303: end_p_height = 0;
+      0005F2 21r87r01              1684 	ld	hl, #_end_p_height
+      0005F5 36 00                 1685 	ld	(hl), #0x00
+      0005F7                       1686 00107$:
+                           0005F7  1687 	C$main.c$307$2_0$191	= .
+                                   1688 	.globl	C$main.c$307$2_0$191
+                                   1689 ;src/main.c:307: if(b_button_down && page_select){
+      0005F7 21r84r01              1690 	ld	hl, #_b_button_down
+      0005FA CB 46                 1691 	bit	0, (hl)
+      0005FC 28 34                 1692 	jr	Z, 00110$
+      0005FE 21r76r01              1693 	ld	hl, #_page_select
+      000601 CB 46                 1694 	bit	0, (hl)
+      000603 28 2D                 1695 	jr	Z, 00110$
+                           000605  1696 	C$main.c$308$3_0$199	= .
+                                   1697 	.globl	C$main.c$308$3_0$199
+                                   1698 ;src/main.c:308: page_select = false;
+      000605 36 00                 1699 	ld	(hl), #0x00
+                           000607  1700 	C$main.c$309$4_0$200	= .
+                                   1701 	.globl	C$main.c$309$4_0$200
+                                   1702 ;src/main.c:309: for(end_p_height=20; end_p_height!=255; end_p_height--){
+      000607 21r87r01              1703 	ld	hl, #_end_p_height
+      00060A 36 14                 1704 	ld	(hl), #0x14
+      00060C                       1705 00128$:
+                                   1706 ;src/main.c:310: move_bkg(0, end_p_height);
+      00060C 21r87r01              1707 	ld	hl, #_end_p_height
+      00060F 4E                    1708 	ld	c, (hl)
+                                   1709 ;C:/gbdk/include/gb/gb.h:1080: SCX_REG=x, SCY_REG=y;
+      000610 AF                    1710 	xor	a, a
+      000611 E0r00                 1711 	ldh	(_SCX_REG + 0), a
+      000613 79                    1712 	ld	a, c
+      000614 E0r00                 1713 	ldh	(_SCY_REG + 0), a
+                           000616  1714 	C$main.c$311$5_0$201	= .
+                                   1715 	.globl	C$main.c$311$5_0$201
+                                   1716 ;src/main.c:311: wait_vbl_done();
+      000616 CDr00r00              1717 	call	_wait_vbl_done
+                           000619  1718 	C$main.c$309$4_0$200	= .
+                                   1719 	.globl	C$main.c$309$4_0$200
+                                   1720 ;src/main.c:309: for(end_p_height=20; end_p_height!=255; end_p_height--){
+      000619 21r87r01              1721 	ld	hl, #_end_p_height
+      00061C 35                    1722 	dec	(hl)
+      00061D 7E                    1723 	ld	a, (hl)
+      00061E 3C                    1724 	inc	a
+      00061F 20 EB                 1725 	jr	NZ, 00128$
+                           000621  1726 	C$main.c$313$3_0$199	= .
+                                   1727 	.globl	C$main.c$313$3_0$199
+                                   1728 ;src/main.c:313: end_p_height = 0;
+      000621 21r87r01              1729 	ld	hl, #_end_p_height
+      000624 36 00                 1730 	ld	(hl), #0x00
+                           000626  1731 	C$main.c$314$3_0$199	= .
+                                   1732 	.globl	C$main.c$314$3_0$199
+                                   1733 ;src/main.c:314: page_number = page_number_temp;
+      000626 FAr74r01              1734 	ld	a, (#_page_number_temp)
+      000629 EAr72r01              1735 	ld	(#_page_number),a
+      00062C FAr75r01              1736 	ld	a, (#_page_number_temp + 1)
+      00062F EAr73r01              1737 	ld	(#_page_number + 1),a
+      000632                       1738 00110$:
+                           000632  1739 	C$main.c$317$2_0$191	= .
+                                   1740 	.globl	C$main.c$317$2_0$191
+                                   1741 ;src/main.c:317: if(page_select){
+      000632 21r76r01              1742 	ld	hl, #_page_select
+      000635 CB 46                 1743 	bit	0, (hl)
+      000637 28 09                 1744 	jr	Z, 00113$
+                           000639  1745 	C$main.c$318$3_0$202	= .
+                                   1746 	.globl	C$main.c$318$3_0$202
+                                   1747 ;src/main.c:318: choose_page();
+      000639 CDr20r04              1748 	call	_choose_page
+                           00063C  1749 	C$main.c$319$3_0$202	= .
+                                   1750 	.globl	C$main.c$319$3_0$202
+                                   1751 ;src/main.c:319: wait_vbl_done();
+      00063C CDr00r00              1752 	call	_wait_vbl_done
+                           00063F  1753 	C$main.c$320$3_0$202	= .
+                                   1754 	.globl	C$main.c$320$3_0$202
+                                   1755 ;src/main.c:320: continue;
+      00063F C3r94r05              1756 	jp	00119$
+      000642                       1757 00113$:
+                           000642  1758 	C$main.c$322$2_0$191	= .
+                                   1759 	.globl	C$main.c$322$2_0$191
+                                   1760 ;src/main.c:322: if(r_button_down){
+      000642 21r81r01              1761 	ld	hl, #_r_button_down
+      000645 CB 46                 1762 	bit	0, (hl)
+      000647 28 03                 1763 	jr	Z, 00115$
+                           000649  1764 	C$main.c$323$3_0$203	= .
+                                   1765 	.globl	C$main.c$323$3_0$203
+                                   1766 ;src/main.c:323: next_page();
+      000649 CDr05r01              1767 	call	_next_page
+      00064C                       1768 00115$:
+                           00064C  1769 	C$main.c$325$2_0$191	= .
+                                   1770 	.globl	C$main.c$325$2_0$191
+                                   1771 ;src/main.c:325: if(l_button_down){
+      00064C 21r82r01              1772 	ld	hl, #_l_button_down
+      00064F CB 46                 1773 	bit	0, (hl)
+      000651 28 03                 1774 	jr	Z, 00117$
+                           000653  1775 	C$main.c$326$3_0$204	= .
+                                   1776 	.globl	C$main.c$326$3_0$204
+                                   1777 ;src/main.c:326: prev_page();
+      000653 CDr3Er01              1778 	call	_prev_page
+      000656                       1779 00117$:
+                           000656  1780 	C$main.c$330$2_0$191	= .
+                                   1781 	.globl	C$main.c$330$2_0$191
+                                   1782 ;src/main.c:330: frame++;
+      000656 21r86r01              1783 	ld	hl, #_frame
+      000659 34                    1784 	inc	(hl)
+                           00065A  1785 	C$main.c$331$2_0$191	= .
+                                   1786 	.globl	C$main.c$331$2_0$191
+                                   1787 ;src/main.c:331: wait_vbl_done();
+      00065A CDr00r00              1788 	call	_wait_vbl_done
+                           00065D  1789 	C$main.c$333$1_0$189	= .
+                                   1790 	.globl	C$main.c$333$1_0$189
+                                   1791 ;src/main.c:333: }
+                           00065D  1792 	C$main.c$333$1_0$189	= .
+                                   1793 	.globl	C$main.c$333$1_0$189
+                           00065D  1794 	XG$main$0$0	= .
+                                   1795 	.globl	XG$main$0$0
+      00065D C3r94r05              1796 	jp	00119$
+                           000660  1797 Fmain$__str_0$0_0$0 == .
+      000660                       1798 ___str_0:
+      000660 48 65 6C 6C 6F 20 77  1799 	.ascii "Hello world"
+             6F 72 6C 64
+      00066B 00                    1800 	.db 0x00
+                                   1801 	.area _CODE
+                                   1802 	.area _INITIALIZER
+                                   1803 	.area _CABS (ABS)
